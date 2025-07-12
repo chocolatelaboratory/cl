@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Bootstrap CSS CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light translucent-navbar sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">Chocolate Lab-oratory | Dog Training Advice & Tips</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="#">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Training Guides</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">About</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <section class="py-5 bg-light">
+    <div class="container">
+      <h2 class="mb-4 text-center">Popular Training Guides</h2>
+      <div class="row g-4">
+
+        <!-- Repeat this col/card for each tip -->
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+          <div class="card h-100">
+            <img src="/assets/card_images/21-dog-training-commands.png" class="card-img-top" alt="21 Training Commands">
+            <div class="card-body">
+              <h5 class="card-title">21 Dog Training Commands</h5>
+              <p class="card-text">21 Dog Training Commands - Basic To Advanced For A Well-Behaved Dog</p>
+              <a href="guides/21-training-commands.html" class="btn btn-primary">Read More</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ...more cards... -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Tips Section -->
+  <section class="py-5">
+    <div class="container">
+      <h3 class="mb-4 text-center">Quick Tips</h3>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="p-3 bg-white border rounded shadow-sm">
+            <strong>Be Consistent</strong>
+            <p>Dogs learn best with consistent routines and clear commands.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3 bg-white border rounded shadow-sm">
+            <strong>Reward Good Behavior</strong>
+            <p>Use treats and praise to reinforce good habits.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-3 bg-white border rounded shadow-sm">
+            <strong>Keep Training Sessions Short</strong>
+            <p>5-10 minutes at a time keeps dogs engaged and happy.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-5 bg-white">
+    <div class="container text-center">
+      <h3>About Us</h3>
+      <p class="mb-2">
+        Our mission is to help dog owners raise happy, well-behaved pets with simple, science-backed training advice. Whether you’re a first-time owner or a seasoned trainer, we’re here to guide you every step of the way.
+      </p>
+      <a href="about.html" class="btn btn-outline-primary btn-sm">Learn more</a>
+    </div>
+  </section>
+
+  <section class="py-5 bg-primary text-white">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-md-7 mb-4 mb-md-0">
+          <h3 class="fw-bold">Get Our Free Training Guide</h3>
+          <p class="mb-0">Sign up for our newsletter and receive a free, expert-crafted guide to start your dog’s training off right. Plus, get the latest tips and resources delivered to your inbox!</p>
+        </div>
+        <div class="col-md-5">
+          <form>
+            <div class="input-group">
+              <input type="email" class="form-control" placeholder="Your email address" required>
+              <button type="submit" class="btn btn-light text-primary fw-bold">Get My Free Guide</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Footer -->
+  <footer class="bg-light text-center text-lg-start mt-auto">
+    <div class="container p-4">
+      <p class="mb-1">© 2025 Wonka's Chocolate Laboratory. All rights reserved.</p>
+      <a href="#" class="text-decoration-none me-3">Privacy Policy</a>
+      <a href="#" class="text-decoration-none">Contact</a>
+    </div>
+  </footer>
+
+</body>
+</html>
