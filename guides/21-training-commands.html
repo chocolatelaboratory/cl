@@ -18,7 +18,7 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="/home/index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" id="home-link" href="/index.html">Home</a></li>
           <li class="nav-item"><a class="nav-link active" href="#">Training Guides</a></li>
           <li class="nav-item"><a class="nav-link" href="#">About</a></li>
         </ul>
@@ -198,6 +198,18 @@
       <a href="#" class="text-decoration-none">Contact</a>
     </div>
   </footer>
+
+    <script>
+    // Dynamically set Home link for local dev and GitHub Pages
+    const homeLink = document.getElementById('home-link');
+    if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+      // Local development
+      homeLink.setAttribute('href', '/index.html');
+    } else {
+      // GitHub Pages (repo named "cl")
+      homeLink.setAttribute('href', '/cl/index.html');
+    }
+  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
