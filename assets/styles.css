@@ -5,3 +5,9 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
   border-bottom: 1px solid rgba(0,0,0,0.04); /* subtle border for separation */
 }
+
+.card {
+  border-top-left-radius: 100px;  /* Match your card's border radius */
+  border-top-right-radius: 100px;
+  /* Optionally, set overflow hidden on the card for perfect clipping */
+}
