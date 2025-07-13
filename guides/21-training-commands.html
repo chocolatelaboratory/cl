@@ -19,7 +19,7 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
           <li class="nav-item">
-            <a class="nav-link aria-current="page" href="/index.html">Home</a>
+            <a class="nav-link" aria-current="page" id='home-link' href="/index.html">Home</a>
           </li>
           <li class="nav-item">
             <a class="nav-link active" href="#">Guides</a>
@@ -206,7 +206,7 @@
     </div>
   </footer>
 
-    <script>
+  <script>
     // Dynamically set Home link for local dev and GitHub Pages
     const homeLink = document.getElementById('home-link');
     if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
