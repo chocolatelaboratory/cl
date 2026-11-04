@@ -1,0 +1,102 @@
+{
+  "name": "Weight Loss Tracker",
+  "accent": "terracotta",
+  "palette": { "bg": "#FFF9F7", "b1": "#FDE7E1", "b2": "#FBE4EE", "soft": "#FDECE7", "main": "#E8664D", "strong": "#B23F2C", "accent": "#B8326A" },
+  "finish": "jet",
+  "slides": [
+    {
+      "type": "hero",
+      "views": ["weight", "today", "photos"],
+      "headline": "Weight Loss Tracker",
+      "highlight": "Tracker",
+      "sub": "Check in in 10 seconds. Watch your real trend go down.",
+      "badges": ["Phone & computer", "Instant download", "No subscription"]
+    },
+    {
+      "type": "phone",
+      "view": "today",
+      "headline": "Log your day in 10 seconds",
+      "highlight": "10 seconds",
+      "sub": "One quick check-in for weight, water and mood.",
+      "bullets": ["A “Right now” card shows your next step", "One-tap tiles for food, moves and wins", "A streak that lights up every day"]
+    },
+    {
+      "type": "phone",
+      "view": "weight",
+      "side": "left",
+      "headline": "See real progress, not daily noise",
+      "highlight": "real progress",
+      "sub": "Your trend line ignores water-weight swings.",
+      "bullets": ["Plateau decoder explains scale jumps", "Weekly pace and projected goal date", "Pounds or kilograms, switch anytime"]
+    },
+    {
+      "type": "phone",
+      "view": "food",
+      "headline": "Count calories, or don’t",
+      "highlight": "or don’t",
+      "sub": "Track calories and protein, or switch to Simple mode.",
+      "bullets": ["Rate meals Great, Okay or Treat", "Tap a favorite to log it again", "Water glasses you tap to fill"]
+    },
+    {
+      "type": "two-phones",
+      "views": ["photos", "body"],
+      "headline": "Proof the scale can’t show",
+      "highlight": "Proof",
+      "sub": "Before-and-after photos and inches lost, side by side.",
+      "bullets": ["Drag-to-compare photo slider", "Waist, hips and 4 more areas", "Photos stay private on your phone"]
+    },
+    {
+      "type": "phone",
+      "view": "wins",
+      "side": "left",
+      "js": "var b=document.querySelector('.badges').closest('.panel'); window.scrollTo(0, b.getBoundingClientRect().top + scrollY - 16)",
+      "headline": "Celebrate every win",
+      "highlight": "every win",
+      "sub": "Badges every 5 lb, plus your non-scale victories.",
+      "bullets": ["Milestones, streaks and goal weight", "A timeline of non-scale wins", "A gentle celebration, never guilt"]
+    },
+    {
+      "type": "two-phones",
+      "views": ["habits", "meals"],
+      "headline": "Habits, meals and groceries too",
+      "highlight": "too",
+      "sub": "Everything that helps, in one calm app.",
+      "bullets": ["Habit streaks and 5-week heatmaps", "Plan the week from your saved meals", "Grocery list from your plan in one tap"]
+    },
+    {
+      "type": "phone",
+      "view": "insights",
+      "side": "left",
+      "js": "var b=document.querySelector('.view.active .insight').closest('.panel'); window.scrollTo(0, b.getBoundingClientRect().top + scrollY - 16)",
+      "headline": "Learn what works for you",
+      "highlight": "works for you",
+      "sub": "Kind insights from your own data.",
+      "bullets": ["Weekly and 30-day reports", "Sleep, protein and habit patterns", "Active minutes at a glance"]
+    },
+    {
+      "type": "desktop",
+      "view": "today",
+      "phone_view": "weight",
+      "headline": "Works on your phone and computer",
+      "highlight": "phone and computer",
+      "sub": "Opens in any web browser. Nothing to install."
+    },
+    {
+      "type": "features",
+      "headline": "What’s inside",
+      "highlight": "inside",
+      "items": [
+        { "icon": "home", "title": "Today", "text": "10-second check-in, streak and next step" },
+        { "icon": "monitor_weight", "title": "Weight", "text": "Trend line, plateau decoder and goal date" },
+        { "icon": "restaurant", "title": "Food & water", "text": "Calories and protein, or Simple mode" },
+        { "icon": "straighten", "title": "Body & photos", "text": "Inches lost and before-and-after slider" },
+        { "icon": "emoji_events", "title": "Wins & badges", "text": "Milestones and non-scale victories" },
+        { "icon": "insights", "title": "Insights", "text": "Weekly and monthly patterns" },
+        { "icon": "directions_walk", "title": "Move & habits", "text": "Activity log, streaks and heatmaps" },
+        { "icon": "shopping_cart", "title": "Meals & groceries", "text": "Weekly meal plan and grocery list" },
+        { "icon": "menu_book", "title": "Journal", "text": "Mood, energy, sleep and daily prompts" }
+      ],
+      "footer": ["Works offline", "Private on your device", "No subscription", "Light & dark mode"]
+    }
+  ]
+}
