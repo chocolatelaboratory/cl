@@ -1,0 +1,40 @@
+{
+  "name": "2027 Goals & Reset Planner",
+  "accent": "terracotta",
+  "palette": { "bg": "#F3F1F6", "b1": "#E6DDF3", "b2": "#FBF3E2", "soft": "#F4F0F9", "main": "#7A4CC2", "strong": "#503975", "accent": "#7A4CC2" },
+  "glow": ["#B79BE8", "#E2D5F5", "#F5D49A", "#EDE4F8"],
+  "finish": "jet",
+  "slides": [
+    { "type": "hero", "views": [{ "view": "goal", "hide": [] }, { "view": "today", "hide": [] }, { "view": "wheel", "hide": [] }], "hide": [],
+      "headline": "2027 Goal Planner", "highlight": "2027", "sub": "Turn big goals into weekly steps, and keep going past February.", "badges": ["Phone & computer", "Instant download", "No subscription"] },
+    { "type": "phone", "view": "today", "hide": [], "headline": "Know your next step, every day", "highlight": "next step",
+      "sub": "See which goals are on track and what to do next.", "bullets": ["This week's top 3 steps, one tap to finish", "Habits with streaks", "Progress for every life area"] },
+    { "type": "phone", "view": "goal", "side": "left", "hide": [], "headline": "Watch every goal come to life", "highlight": "come to life",
+      "sub": "Each step is a stop on the road to your trophy.", "bullets": ["A journey path for every goal", "Steps, numbers or habits", "Your why, right where you need it"] },
+    { "type": "phone", "view": "goals", "hide": [], "headline": "Know if you're on pace", "highlight": "on pace",
+      "sub": "Every goal shows if you're ahead, on track or behind.", "bullets": ["8 life areas, color-coded", "Progress bars and next steps", "Save money, read books, run races"] },
+    { "type": "two-phones", "views": [{ "view": "review", "hide": [] }, { "view": "habits", "hide": [] }], "hide": [], "headline": "A 5-minute Sunday check-in", "highlight": "5-minute",
+      "sub": "Look back, plan ahead and keep your habits going.", "bullets": ["Wins, roadblocks and next week's top 3", "Monthly and yearly reviews", "Habit streaks and heatmaps"] },
+    { "type": "phone", "view": "wheel", "side": "left", "hide": [], "headline": "Score your wheel of life", "highlight": "wheel of life",
+      "sub": "See which areas need love, then set a goal for them.", "bullets": ["8 areas on a radar chart", "Compare with last time", "One tap to add a goal"] },
+    { "type": "two-phones", "views": [{ "view": "reset", "hide": [] }, { "view": "yearreview", "hide": [] }], "hide": [], "headline": "Your new year reset, done right", "highlight": "reset",
+      "sub": "Reflect on last year before you plan the next.", "bullets": ["10 guided year-in-review questions", "Word of the year", "A reset checklist to follow"] },
+    { "type": "phone", "view": "vision", "side": "left", "hide": [], "js": "var b=document.querySelector('.vgrid'); window.scrollTo(0, b.getBoundingClientRect().top + scrollY - 300)",
+      "headline": "A vision board you'll see daily", "highlight": "vision board",
+      "sub": "Your photos, dreams and quotes in one place.", "bullets": ["Add your own photos", "Bucket list with ideas", "Private on your device"] },
+    { "type": "desktop", "view": "today", "phone_view": "goals", "hide": [], "headline": "Works on your phone and computer", "highlight": "phone and computer", "sub": "Opens in any web browser. Nothing to install." },
+    { "type": "features", "headline": "What's inside", "highlight": "inside",
+      "items": [
+        { "icon": "home", "title": "Today", "text": "Next step, top 3, habits and countdown" },
+        { "icon": "flag", "title": "Goals", "text": "Steps, numbers or habits, with pace" },
+        { "icon": "route", "title": "Journey path", "text": "Every step is a stop to the trophy" },
+        { "icon": "local_fire_department", "title": "Habits", "text": "Streaks, heatmaps, linked to goals" },
+        { "icon": "event_note", "title": "Reviews", "text": "Weekly check-in, month and year" },
+        { "icon": "history_edu", "title": "Year in review", "text": "10 guided questions and top wins" },
+        { "icon": "donut_large", "title": "Wheel of life", "text": "8 areas scored on a radar chart" },
+        { "icon": "auto_awesome", "title": "Vision board", "text": "Word of the year, photos and quotes" },
+        { "icon": "celebration", "title": "Bucket list", "text": "Experiences to live this year" }
+      ],
+      "footer": ["Works offline", "Private on your device", "No subscription", "Light & dark mode"] }
+  ]
+}
