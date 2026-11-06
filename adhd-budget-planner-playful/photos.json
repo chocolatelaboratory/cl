@@ -1,0 +1,261 @@
+{
+ "name": "ADHD Budget Planner",
+ "palette": {
+  "bg": "#F1FBF9",
+  "b1": "#D6F6F0",
+  "b2": "#FFE9E2",
+  "soft": "#D9F7F2",
+  "main": "#17C3B2",
+  "strong": "#1F7E75",
+  "accent": "#17C3B2"
+ },
+ "highlight_color": "#14A596",
+ "glow": [
+  "#7FE3D6",
+  "#C7F4EC",
+  "#FFD2C2",
+  "#D8F3EE"
+ ],
+ "slides": [
+  {
+   "type": "hero",
+   "hide": [],
+   "views": [
+    {
+     "view": "bills",
+     "hide": []
+    },
+    {
+     "view": "home",
+     "hide": []
+    },
+    {
+     "view": "goals",
+     "hide": []
+    }
+   ],
+   "headline": "ADHD Budget Planner",
+   "highlight": "Budget",
+   "sub": "Know what’s safe to spend today. Log it in two taps.",
+   "badges": [
+    "Phone & computer",
+    "Instant download",
+    "No subscription"
+   ]
+  },
+  {
+   "type": "comparison",
+   "view": "home",
+   "hide": [],
+   "headline": "More than a spreadsheet",
+   "highlight": "spreadsheet",
+   "sub": "It does the work a spreadsheet can’t.",
+   "versus": "SPREADSHEET",
+   "rows": [
+    [
+     "Track what you spend",
+     true
+    ],
+    [
+     "Safe to spend today",
+     false
+    ],
+    [
+     "Two-tap spend logging",
+     false
+    ],
+    [
+     "Payday countdown",
+     false
+    ],
+    [
+     "Debt-free road map",
+     false
+    ],
+    [
+     "48-hour impulse wait list",
+     false
+    ]
+   ]
+  },
+  {
+   "type": "phone",
+   "view": "home",
+   "hide": [],
+   "headline": "One number: what’s safe today",
+   "highlight": "safe today",
+   "sub": "Your balance, bills and payday, turned into one friendly number.",
+   "bullets": [
+    "Tap “How is this worked out?” to see every figure",
+    "One next step at a time, never a wall of tasks",
+    "Type “12 coffee” and it’s logged"
+   ]
+  },
+  {
+   "type": "phone",
+   "view": "bills",
+   "hide": [],
+   "side": "left",
+   "js": "var b=document.querySelector('#view-bills .tabs'); window.scrollTo(0, b.getBoundingClientRect().top + scrollY - 16)",
+   "headline": "Every bill, soonest first",
+   "highlight": "soonest first",
+   "sub": "Tick one off and it throws a tiny party.",
+   "bullets": [
+    "Monthly, twice a month, every 2 weeks, weekly or once",
+    "Big bills set aside as a monthly share",
+    "Debt minimums tick off right here"
+   ]
+  },
+  {
+   "type": "phone",
+   "view": "home",
+   "hide": [],
+   "click": [
+    ".bottom-nav .add"
+   ],
+   "fill": [
+    [
+     "#add-amt",
+     "6.25"
+    ],
+    [
+     "#add-note",
+     "Iced latte"
+    ]
+   ],
+   "js": "document.querySelectorAll('[data-choice=cat] .choice').forEach(function(c){c.classList.toggle('on', c.dataset.v==='coffee')})",
+   "headline": "Log a spend in seconds",
+   "highlight": "seconds",
+   "sub": "Big buttons, cute emoji, no setup screens.",
+   "bullets": [
+    "Quick amounts: $5, $10, $20, $50",
+    "Pick the envelope with one tap",
+    "Money in too: paychecks, refunds, gifts"
+   ]
+  },
+  {
+   "type": "two-phones",
+   "hide": [],
+   "views": [
+    {
+     "view": "money",
+     "hide": []
+    },
+    {
+     "view": "money",
+     "hide": [],
+     "click": [
+      "[data-action=money-tab][data-v=month]"
+     ],
+     "js": "var b=document.querySelector('.cal-panel'); window.scrollTo(0, b.getBoundingClientRect().top + scrollY - 16)"
+    }
+   ],
+   "headline": "Envelopes that never scold",
+   "highlight": "never scold",
+   "sub": "Soft spending limits and your whole month on one calendar.",
+   "bullets": [
+    "Going over is a gentle note, not a red alarm",
+    "Paydays, bills and spending as colored dots",
+    "What came in, what went out, what you kept"
+   ]
+  },
+  {
+   "type": "phone",
+   "view": "goals",
+   "hide": [],
+   "side": "left",
+   "js": "var b=document.querySelector('#road').closest('.panel'); window.scrollTo(0, b.getBoundingClientRect().top + scrollY - 16)",
+   "headline": "Your road to debt-free",
+   "highlight": "debt-free",
+   "sub": "Every debt is a stop on the road, with a trophy at the end.",
+   "bullets": [
+    "Smallest first or highest rate first",
+    "Record payments and see the history",
+    "A trophy screen when one is paid off"
+   ]
+  },
+  {
+   "type": "phone",
+   "view": "goals",
+   "hide": [],
+   "click": [
+    "[data-action=goal-tab][data-v=wait]"
+   ],
+   "headline": "Park it before you buy it",
+   "highlight": "Park it",
+   "sub": "The 48-hour wait list for “I need this right now”.",
+   "bullets": [
+    "Skip it or buy it guilt-free after 48 hours",
+    "Watch “saved by skipping” grow",
+    "Savings goals with quick +$25 buttons"
+   ]
+  },
+  {
+   "type": "desktop",
+   "view": "home",
+   "phone_view": "bills",
+   "hide": [],
+   "headline": "On your phone and computer",
+   "highlight": "phone and computer",
+   "sub": "Opens in your browser on iPhone, Android, Mac and Windows. Works offline, private on your device."
+  },
+  {
+   "type": "features",
+   "headline": "What’s inside",
+   "highlight": "inside",
+   "items": [
+    {
+     "icon": "savings",
+     "title": "Safe to spend",
+     "text": "Today’s number, explained"
+    },
+    {
+     "icon": "bolt",
+     "title": "Right now",
+     "text": "One next step at a time"
+    },
+    {
+     "icon": "receipt_long",
+     "title": "Bills",
+     "text": "Any schedule, tick to pay"
+    },
+    {
+     "icon": "mail",
+     "title": "Envelopes",
+     "text": "Soft monthly limits"
+    },
+    {
+     "icon": "payments",
+     "title": "Paychecks",
+     "text": "Countdown to payday"
+    },
+    {
+     "icon": "calendar_month",
+     "title": "Month view",
+     "text": "In, out and kept"
+    },
+    {
+     "icon": "route",
+     "title": "Debt-free road",
+     "text": "Snowball or avalanche"
+    },
+    {
+     "icon": "flag",
+     "title": "Savings goals",
+     "text": "Trophy when you hit one"
+    },
+    {
+     "icon": "local_parking",
+     "title": "Wait list",
+     "text": "Park impulse buys 48h"
+    }
+   ],
+   "footer": [
+    "Works offline",
+    "Private on your device",
+    "No subscription",
+    "Light & dark mode"
+   ]
+  }
+ ]
+}

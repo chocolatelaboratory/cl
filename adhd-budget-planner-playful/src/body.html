@@ -1,0 +1,102 @@
+<body data-motion="playful">
+
+<div class="app">
+
+  <aside class="sidebar">
+    <button class="btn-fun side-add" data-action="open-add">+ Log a spend</button>
+    <ul class="nav-list" id="nav-list"></ul>
+    <div class="sidebar-footer">Saved privately on this device</div>
+  </aside>
+
+  <main class="main">
+
+    <!-- ---------- HOME ---------- -->
+    <section class="view active" id="view-home"></section>
+
+    <!-- ---------- BILLS ---------- -->
+    <section class="view" id="view-bills"></section>
+
+    <!-- ---------- MONEY ---------- -->
+    <section class="view" id="view-money"></section>
+
+    <!-- ---------- GOALS ---------- -->
+    <section class="view" id="view-goals"></section>
+
+    <!-- ---------- SETTINGS ---------- -->
+    <section class="view" id="view-settings">
+      <header class="top rise" style="--i:0"><div class="hi"><span class="wave emo">⚙️</span><div><span class="date">Make it yours</span><h1>Settings</h1></div></div></header>
+      <div class="panel settings-group rise" style="--i:1">
+        <div class="panel-head"><h2>About you <span class="emo">🙂</span></h2></div>
+        <form id="profile-form" class="form-stack" autocomplete="off">
+          <label class="field-col"><span>Your first name</span><input type="text" id="set-name" maxlength="30" placeholder="e.g. Sam"></label>
+          <label class="field-col"><span>Currency</span>
+            <select id="set-currency">
+              <option value="$">$ Dollar</option><option value="£">£ Pound</option><option value="€">€ Euro</option><option value="¥">¥ Yen / Yuan</option><option value="₹">₹ Rupee</option><option value="kr">kr Krona / Krone</option><option value="zł">zł Złoty</option><option value="R$">R$ Real</option><option value="R">R Rand</option><option value="₱">₱ Peso</option><option value="₩">₩ Won</option><option value="₺">₺ Lira</option><option value="CHF">CHF Franc</option>
+            </select></label>
+          <button type="submit" class="btn-fun">Save</button>
+        </form>
+      </div>
+      <div class="panel settings-group rise" style="--i:2">
+        <div class="panel-head"><h2>Appearance <span class="emo">🌗</span></h2></div>
+        <div class="settings-row">
+          <div><div class="settings-row-title">Theme</div><div class="settings-row-desc">Auto follows your phone's light or dark setting</div></div>
+          <div class="theme-seg" role="radiogroup" aria-label="Theme">
+            <button data-theme-set="light" role="radio">Light</button><button data-theme-set="dark" role="radio">Dark</button><button data-theme-set="auto" role="radio">Auto</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel settings-group rise" style="--i:3">
+        <div class="panel-head"><h2>Your data <span class="emo">💾</span></h2></div>
+        <div class="settings-row">
+          <div><div class="settings-row-title">Try it with sample data</div><div class="settings-row-desc">See how everything fits together</div></div>
+          <button id="load-sample-btn" class="btn btn-secondary btn-sm">Load sample data</button>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-title">Back up</div><div class="settings-row-desc">Download a copy of everything</div></div>
+          <button id="export-btn" class="btn btn-secondary btn-sm">Export backup</button>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-title">Spending as a spreadsheet</div><div class="settings-row-desc">A CSV file of every spend and money in</div></div>
+          <button id="csv-btn" class="btn btn-secondary btn-sm">Export CSV</button>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-title">Restore</div><div class="settings-row-desc">Load a backup file you exported earlier</div></div>
+          <button id="import-btn" class="btn btn-secondary btn-sm">Import backup</button>
+          <input type="file" id="import-file" accept="application/json,.json" class="hidden">
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-title">Clear all data</div><div class="settings-row-desc">Start completely fresh on this device</div></div>
+          <button id="clear-btn" class="btn btn-ghost-danger btn-sm">Clear all data</button>
+        </div>
+      </div>
+      <p class="helper">Everything you enter stays private in this browser on this device. Nothing is uploaded anywhere, and it never connects to your bank.</p>
+    </section>
+
+  </main>
+
+  <nav class="bottom-nav" aria-label="Main" id="bottom-nav"></nav>
+
+  <div id="toast-container" aria-live="polite"></div>
+  <div id="confetti-layer"></div>
+  <canvas id="party-canvas"></canvas>
+
+  <!-- Form sheet (log a spend, bills, paychecks, debts, goals...) -->
+  <div class="overlay hidden" id="sheet-overlay">
+    <div class="sheet" role="dialog" aria-modal="true" id="sheet-body"></div>
+  </div>
+
+  <!-- Confirm modal -->
+  <div class="overlay hidden" id="modal-overlay">
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="handle"></div>
+      <h3 id="modal-title">Are you sure?</h3>
+      <p id="modal-message"></p>
+      <input type="text" id="modal-confirm-input" class="hidden" autocomplete="off">
+      <div class="modal-actions">
+        <button id="modal-cancel" class="btn btn-secondary">Cancel</button>
+        <button id="modal-confirm" class="btn btn-primary">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+</div>

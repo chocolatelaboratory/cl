@@ -1,0 +1,125 @@
+{
+ "name": "ADHD Budget Planner",
+ "palette": {
+  "bg": "#F1FBF9",
+  "b1": "#D6F6F0",
+  "b2": "#FFE9E2",
+  "soft": "#D9F7F2",
+  "main": "#17C3B2",
+  "strong": "#1F7E75",
+  "accent": "#17C3B2"
+ },
+ "highlight_color": "#14A596",
+ "glow": [
+  "#7FE3D6",
+  "#C7F4EC",
+  "#FFD2C2",
+  "#D8F3EE"
+ ],
+ "brand": "LUCIAN VOX DESIGNS",
+ "cta": "Instant download on Etsy",
+ "board": "Budgeting Tips",
+ "pins": [
+  {
+   "layout": "hero",
+   "hide": [],
+   "views": [
+    {
+     "view": "bills",
+     "hide": []
+    },
+    {
+     "view": "home",
+     "hide": []
+    },
+    {
+     "view": "goals",
+     "hide": []
+    }
+   ],
+   "headline": "A budget app for ADHD brains",
+   "highlight": "ADHD brains",
+   "sub": "One number: what’s safe to spend today.",
+   "badges": [
+    "Phone & computer",
+    "No subscription"
+   ],
+   "title": "ADHD Budget Planner App: See What’s Safe to Spend Today",
+   "description": "A budget planner made for ADHD brains: one big number shows what’s safe to spend today, worked out from your balance, your bills and your next payday. Log spending in two taps, tick off bills, fill savings goals and follow a debt-free road. A bright, playful budget app for phone and computer, with no bank login and no subscription.",
+   "alt": "Three phones showing a teal ADHD budget planner app: safe to spend today, bills before payday and a debt payoff road.",
+   "board": "ADHD Budgeting"
+  },
+  {
+   "layout": "phone",
+   "view": "home",
+   "hide": [],
+   "headline": "Paycheck to paycheck? Start here",
+   "highlight": "Start here",
+   "sub": "A daily number that gets you to payday with bills paid.",
+   "badges": [
+    "Payday countdown",
+    "Bills first"
+   ],
+   "title": "How to Budget Paycheck to Paycheck (Without Spreadsheets)",
+   "description": "Budgeting paycheck to paycheck is easier with one daily number. This paycheck budget app takes what’s in your account, subtracts the bills due before payday and splits the rest by the days left, so you know what you can spend today. Includes a run-to-payday strip, quick spend logging and a bill tracker.",
+   "alt": "Phone showing a budget app home screen with $39 safe to spend today, 5 days to payday and a bill due tomorrow.",
+   "board": "Paycheck Budgeting"
+  },
+  {
+   "layout": "list",
+   "view": "bills",
+   "hide": [],
+   "list_top": 360,
+   "peek_bottom": -500,
+   "headline": "5 budget habits for ADHD",
+   "highlight": "ADHD",
+   "bullets": [
+    "Check one number a day",
+    "Log spending the moment it happens",
+    "Pay bills in order of due date",
+    "Wait 48 hours before impulse buys",
+    "Celebrate every bill paid"
+   ],
+   "title": "5 Budget Habits That Actually Work for ADHD",
+   "description": "Simple ADHD budgeting tips: check one number a day, log spending right away, pay bills soonest first, wait 48 hours before impulse buys and celebrate every bill you pay. This ADHD budget planner app builds all five in: a safe-to-spend number, two-tap logging, a bill tracker with big check boxes and a 48-hour wait list.",
+   "alt": "Checklist of five ADHD budget habits above a phone showing a bill tracker with bills sorted by due date.",
+   "board": "ADHD Tips"
+  },
+  {
+   "layout": "phone",
+   "view": "goals",
+   "hide": [],
+   "js": "var b=document.querySelector('#road').closest('.panel'); window.scrollTo(0, b.getBoundingClientRect().top + scrollY - 16)",
+   "headline": "Make paying off debt feel like a game",
+   "highlight": "a game",
+   "sub": "Every debt is a stop on the road to a trophy.",
+   "badges": [
+    "Debt snowball",
+    "Debt avalanche"
+   ],
+   "title": "Debt Snowball Tracker That Feels Like a Game",
+   "description": "Paying off debt is easier when you can see the finish line. This debt payoff tracker turns each card or loan into a stop on a winding road, with a trophy at the end. Choose snowball (smallest first) or avalanche (highest rate first), record payments and get a trophy screen when a debt is gone.",
+   "alt": "Phone showing a debt payoff road with stops for each debt, a trophy at the end and payoff order buttons.",
+   "board": "Debt Payoff"
+  },
+  {
+   "layout": "phone",
+   "view": "goals",
+   "hide": [],
+   "click": [
+    "[data-action=goal-tab][data-v=wait]"
+   ],
+   "headline": "Stop impulse buys: wait 48 hours",
+   "highlight": "wait 48 hours",
+   "sub": "Park it. Decide later. Watch your savings grow.",
+   "badges": [
+    "Saved by skipping",
+    "No guilt"
+   ],
+   "title": "Stop Impulse Spending: Try a 48-Hour Wait List",
+   "description": "A simple trick for impulse spending: park the thing you want for 48 hours, then decide. This budget app has a built-in wait list that reminds you when the time is up, lets you skip it or buy it guilt-free and counts how much you saved by skipping. Great for ADHD and dopamine shopping.",
+   "alt": "Phone showing an impulse wait list with an air fryer ready to decide and $186 saved by skipping.",
+   "board": "Saving Money Tips"
+  }
+ ]
+}
