@@ -3,9 +3,9 @@
 <style>body{margin:0;background:#fff}.c{position:relative;overflow:hidden;background:#fff;color:#1d2147;font-family:Inter,sans-serif}
 canvas{position:absolute;inset:0;width:100%;height:100%}.t{position:absolute;z-index:2}
 .n{font-family:'Cormorant Garamond',serif;font-weight:300;letter-spacing:.05em;line-height:1}
-.rb{position:relative;height:1px;background:linear-gradient(90deg,#ff7ac8,#ffb36b 18%,#7affc1 38%,#6fd3ff 55%,#9b7bff 72%,rgba(155,123,255,0))}
-.rb::after{content:'';position:absolute;left:0;right:0;top:50%;height:300%;transform:translateY(-50%);background:inherit;filter:blur(6px);opacity:.9}
-.rb::before{content:'';position:absolute;left:0;right:0;top:50%;height:900%;transform:translateY(-50%);background:inherit;filter:blur(14px);opacity:.45}
+.rb{position:relative;height:1px;transform:scaleY(.6);opacity:.85;filter:blur(.3px);background:linear-gradient(90deg,#ff9ad4,#ffc89a 15%,#f6f0a0 25%,#9ff0d0 38%,#9adcff 52%,#b6a2ff 68%,rgba(182,162,255,0))}
+.rb::after{content:'';position:absolute;left:0;right:0;top:50%;height:400%;transform:translateY(-50%);background:inherit;filter:blur(5px);opacity:.35}
+.rb::before{content:'';position:absolute;left:0;right:0;top:50%;height:900%;transform:translateY(-50%);background:inherit;filter:blur(14px);opacity:.15}
 .cap{letter-spacing:.45em;text-transform:uppercase;font-weight:300;color:#5d6398}</style></head><body>
 <script>
 function mk(id,W,H,html){const el=document.createElement('div');el.className='c';el.id=id;el.style.cssText=`width:${W}px;height:${H}px`;const cv=document.createElement('canvas');el.appendChild(cv);document.body.appendChild(el);
@@ -13,6 +13,6 @@ function mk(id,W,H,html){const el=document.createElement('div');el.className='c'
  }
 const L=s=>`<div class="n" style="font-size:${s}px">Lucian <i>Vox</i></div>`,TAG='Lighting your digital pathway';
 mk('white_banner_mini',600,150,`<div class="t" style="left:46px;top:40px">${L(36)}<div class="cap" style="font-size:7px;margin-top:12px">${TAG}</div><div class="rb" style="width:180px;margin-top:10px"></div></div>`);
-mk('white_banner_large',1680,420,`<div class="t" style="left:120px;top:120px">${L(82)}<div class="cap" style="font-size:13px;margin-top:40px">${TAG}</div><div class="rb" style="width:340px;height:2px;margin-top:22px"></div></div>`);
+mk('white_banner_large',1680,420,`<div class="t" style="left:120px;top:120px">${L(82)}<div class="cap" style="font-size:13px;margin-top:40px">${TAG}</div><div class="rb" style="width:340px;height:1.5px;margin-top:22px"></div></div>`);
 mk('white_icon',500,500,`<div class="t n" style="inset:0;display:flex;align-items:center;justify-content:center;font-size:330px;padding-right:20px"><i>V</i></div>`);
 </script></body></html>
