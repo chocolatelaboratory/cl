@@ -6,13 +6,15 @@ text{font-family:'Cormorant Garamond',serif;fill:#1d2147}</style></head><body><d
 <script>
 const RB=`<defs><linearGradient id="rb" x1="0" x2="1"><stop offset="0" stop-color="#ff9ad4"/><stop offset=".2" stop-color="#ffc89a"/><stop offset=".35" stop-color="#f6f0a0"/><stop offset=".5" stop-color="#9ff0d0"/><stop offset=".68" stop-color="#9adcff"/><stop offset=".85" stop-color="#b6a2ff"/><stop offset="1" stop-color="#b6a2ff" stop-opacity="0"/></linearGradient><filter id="bl"><feGaussianBlur stdDeviation="5"/></filter><filter id="b1"><feGaussianBlur stdDeviation=".6"/></filter></defs>`;
 // [label, Lsize, Vsize, Lweight, V italic?, glow, circle]
-const D=[['A · Same start, same size',300,300,300,1,0,0],['B · Same start, V taller',230,320,300,1,0,0],['C · Same start + glow line',280,280,300,1,1,0],['D · Same start, upright V',300,300,300,0,0,0]];
+const D=[['A · Same start, same size',400,400,300,1,0,0],['B · Same start, V taller',230,320,300,1,0,0],['C · Same start + glow line',280,280,300,1,1,0],['D · Same start, upright V',300,300,300,0,0,0]];
 const g=document.getElementById('grid');
 document.fonts.ready.then(()=>{D.forEach(([t,ls,vs,w,it,glow,circ],k)=>{
  g.insertAdjacentHTML('beforeend',`<div><svg id="s${k}" width="500" height="500" viewBox="0 0 500 500">${RB}<g id="g${k}"><text id="L${k}" x="0" y="0" font-size="${ls}" font-weight="${w}">L</text><text id="V${k}" x="0" y="0" font-size="${vs}" font-weight="${w}" ${it?'font-style="italic"':''}>V</text></g></svg><div class="lab">${t}</div></div>`);
- const L=document.getElementById('L'+k),V=document.getElementById('V'+k);const lb=L.getBBox(),vb=V.getBBox();
+ const L=document.getElementById('L'+k),V=document.getElementById('V'+k);const lb=L.getBBox();let vb=V.getBBox();
+ if(k==0){const lb0=L.getBBox(),vb0=V.getBBox();V.setAttribute('font-size',vs*lb0.height/vb0.height);}
  // align V's top-left with L's top-left (same starting point)
- V.setAttribute('x',lb.x-vb.x);V.setAttribute('y',lb.y-vb.y);
+ const lb2=L.getBBox();vb=V.getBBox();V.setAttribute('x',lb2.x-vb.x);V.setAttribute('y',lb.y-vb.y);
+ if(k==0){const lb3=L.getBBox();const svg=document.getElementById('s'+k);svg.querySelector('defs').insertAdjacentHTML('beforeend',`<clipPath id="cp0"><rect x="-2000" y="-2000" width="4000" height="2000"/></clipPath>`);V.setAttribute('clip-path','url(#cp0)');}
  const gb=document.getElementById('g'+k).getBBox();const tx=250-(gb.x+gb.width/2),ty=(glow?235:250)-(gb.y+gb.height/2);
  document.getElementById('g'+k).setAttribute('transform',`translate(${tx},${ty})`);
  if(glow){const y=ty+gb.y+gb.height+38,x=tx+gb.x,wd=gb.width*1.05;document.getElementById('s'+k).insertAdjacentHTML('beforeend',`<rect x="${x}" y="${y-5}" width="${wd}" height="10" fill="url(#rb)" opacity=".3" filter="url(#bl)"/><rect x="${x}" y="${y-.6}" width="${wd}" height="1.2" fill="url(#rb)" opacity=".9" filter="url(#b1)"/>`)}
