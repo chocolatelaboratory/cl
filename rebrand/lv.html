@@ -1,0 +1,33 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:wght@300&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#f2f2f5}#grid{display:grid;grid-template-columns:repeat(4,400px);gap:0 20px;padding:20px}
+canvas{width:400px;height:400px;display:block;background:#fff}.lab{font-family:Inter;font-size:13px;color:#888;letter-spacing:.08em;padding:6px 0 16px}
+.hide{position:absolute;left:-9999px}</style></head><body>
+<div class="hide" style="font-family:'Cormorant Garamond'">a<i>a</i><b>a</b><b><i>a</i></b><span style="font-weight:300">a</span><i style="font-weight:300">a</i><span style="font-weight:500">a</span><i style="font-weight:500">a</i><span style="font-weight:600">a</span><i style="font-weight:600">a</i></div>
+<div id="grid"></div>
+<script>
+const V=[ // [id,label,Lstyle,Lweight,Vstyle,Vweight]
+['light','Light (current): upright L, italic V','normal',300,'italic',300],
+['regular','Regular','normal',400,'italic',400],
+['medium','Medium','normal',500,'italic',500],
+['bold','Bold','normal',700,'italic',700],
+['italic_light','All italic, light','italic',300,'italic',300],
+['italic_bold','All italic, bold','italic',700,'italic',700],
+['upright_semibold','Both upright, semibold','normal',600,'normal',600],
+['mixed','Bold L, light italic V','normal',700,'italic',300]];
+const F=(st,w,s)=>`${st} ${w} ${s}px "Cormorant Garamond"`;
+function draw(cv,[id,lab,ls,lw,vs,vw]){const N=1000;cv.width=cv.height=N;const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,N,N);
+ const S=500;x.font=F(ls,lw,S);const mL=x.measureText('L');const hL=mL.actualBoundingBoxAscent+mL.actualBoundingBoxDescent;
+ x.font=F(vs,vw,S);let mV=x.measureText('V');const hV=mV.actualBoundingBoxAscent+mV.actualBoundingBoxDescent;const SV=S*hL/hV;x.font=F(vs,vw,SV);mV=x.measureText('V');
+ // ink boxes relative to origin (0,0 baseline)
+ const L={l:-mL.actualBoundingBoxLeft,r:mL.actualBoundingBoxRight,t:-mL.actualBoundingBoxAscent,b:mL.actualBoundingBoxDescent};
+ const Vb={l:-mV.actualBoundingBoxLeft,r:mV.actualBoundingBoxRight,t:-mV.actualBoundingBoxAscent};
+ const vx=L.l-Vb.l,vy=L.t-Vb.t; // V origin so ink top-left matches
+ const U={l:L.l,r:Math.max(L.r,vx+Vb.r),t:L.t,b:L.b};const W=U.r-U.l,H=U.b-U.t;
+ const sc=Math.min(560/W,560/H);const ox=N/2-(U.l+W/2)*sc,oy=N/2-(U.t+H/2)*sc;
+ x.save();x.translate(ox,oy);x.scale(sc,sc);x.fillStyle='#1d2147';
+ x.font=F(ls,lw,S);x.fillText('L',0,0);
+ x.save();x.beginPath();x.rect(-5000,-5000,10000,5000+L.b);x.clip();x.font=F(vs,vw,SV);x.fillText('V',vx,vy);x.restore();x.restore();}
+document.fonts.load('300 10px "Cormorant Garamond"').then(()=>Promise.all(V.map(v=>document.fonts.load(F(v[2],v[3],10)).then(()=>document.fonts.load(F(v[4],v[5],10)))))).then(()=>{
+ const g=document.getElementById('grid');V.forEach(v=>{g.insertAdjacentHTML('beforeend',`<div><canvas id="${v[0]}"></canvas><div class="lab">${v[1]}</div></div>`);draw(document.getElementById(v[0]),v)});window.DONE=1});
+</script></body></html>

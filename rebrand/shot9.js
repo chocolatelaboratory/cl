@@ -1,0 +1,4 @@
+const {chromium}=require('playwright');const fs=require('fs');(async()=>{const b=await chromium.launch();const p=await b.newPage({deviceScaleFactor:1,viewport:{width:1800,height:1000}});
+await p.goto('file://'+process.cwd()+'/lv.html');await p.waitForFunction('window.DONE');await p.waitForTimeout(500);
+await p.setViewportSize({width:1800,height:1000});const pg=await b.newPage({deviceScaleFactor:2,viewport:{width:1800,height:1000}});await pg.goto('file://'+process.cwd()+'/lv.html');await pg.waitForFunction('window.DONE');await pg.waitForTimeout(500);await pg.locator('#grid').screenshot({path:'lv_variants.png'});
+const ids=await p.$$eval('canvas',c=>c.map(e=>[e.id,e.toDataURL()]));fs.mkdirSync('lv',{recursive:true});for(const [id,d] of ids)fs.writeFileSync(`lv/pfp_LV_${id}.png`,Buffer.from(d.split(',')[1],'base64'));await b.close()})();
