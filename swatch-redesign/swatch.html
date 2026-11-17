@@ -704,7 +704,22 @@ h1, h2, h3{ letter-spacing:-.02em; }
 }
 body{ background: var(--bg); color: var(--ink-body); }
 .main{ padding-top: calc(18px + env(safe-area-inset-top)); }
-@media (min-width:900px){ .main{ max-width:540px; margin:0 auto; flex:1; } .bottom-nav{ display:none !important; } }
+/* Desktop: a real wide layout (sidebar nav, two columns), like the Ultimate tracker */
+@media (min-width:900px){
+  .bottom-nav{ display:none !important; }
+  .main{ max-width:1180px; margin:0 auto; flex:1; padding: 32px 40px 48px; }
+  #view-chart.active, #view-markers.active{ display:grid; grid-template-columns: minmax(0,440px) minmax(0,1fr); gap:0 28px; align-items:start; }
+  #view-markers.active{ grid-template-columns: minmax(0,400px) minmax(0,1fr); }
+  .view.active > .top{ grid-column: 1 / -1; }
+
+  .col-b > .panel:first-child{ margin-top:0; }
+  .col-a > .hero:first-child{ margin-top:0; }
+  #view-tips.active, #view-settings.active{ display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap:0 24px; align-items:start; }
+  #view-tips.active > *:last-child, #view-settings.active > .helper{ grid-column: 1 / -1; }
+  #view-tips.active > *:last-child{ max-width:420px; justify-self:center; width:100%; }
+  #view-tips .card, #view-settings .panel{ margin-top:0; }
+  .mk-grid{ grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); }
+}
 
 /* bouncy pop-in entrance */
 .rise{ animation: p-rise .75s var(--bounce) both; animation-delay: calc(var(--i,0) * 80ms + 60ms); }
@@ -954,6 +969,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
         <div class="hi"><span class="wave emo">👋</span><div><div class="date">Swatch Chart Maker</div><h1>Make a chart</h1></div></div>
         <button class="streak tap" data-goto="markers" aria-label="My markers"><span class="emo">🖍️</span><span id="own-chip">0</span></button>
       </header>
+      <div class="col-a">
       <section class="hero rise" style="--i:1" aria-label="Your chart">
         <div class="sun"></div>
         <div class="mascot emo" aria-hidden="true">🎨</div>
@@ -975,7 +991,8 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
           <div class="pager" id="pager"><button data-action="page-prev" aria-label="Previous page"><span class="icon">chevron_left</span></button><span id="page-label">Page 1 of 1</span><button data-action="page-next" aria-label="Next page"><span class="icon">chevron_right</span></button></div>
         </div>
       </section>
-
+      </div>
+      <div class="col-b">
       <div class="panel rise" style="--i:4">
         <div class="panel-head"><p class="panel-title ptitle"><span class="step">1</span>Which markers? <span class="emo">🖍️</span></p></div>
         <div class="seg" id="line-seg" role="tablist" aria-label="Marker line"><button data-action="line-tab" data-line="h">Honolulu</button><button data-action="line-tab" data-line="oa">Oahu</button></div>
@@ -996,6 +1013,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
         <div class="field-row"><label>Paper</label><div class="seg" id="paper-seg"><button data-action="paper" data-v="Letter">US Letter</button><button data-action="paper" data-v="A4">A4</button></div></div>
       </div>
       <div class="rise" style="--i:7;margin-top:18px"><button class="btn btn-primary btn-big" data-action="print"><span class="icon">print</span>Print my chart</button></div>
+      </div>
     </section>
 
     <!-- ---------- MY MARKERS ---------- -->
@@ -1003,6 +1021,7 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
       <header class="top rise" style="--i:0">
         <div class="hi"><span class="wave emo">🖍️</span><div><div class="date">Tick what you own</div><h1>My markers</h1></div></div>
       </header>
+      <div class="col-a">
       <section class="hero rise" style="--i:1" aria-label="Markers ticked">
         <div class="sun"></div>
         <div class="mascot emo" aria-hidden="true">🖌️</div>
@@ -1023,12 +1042,15 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
         <div class="btn-row"><button class="btn btn-soft btn-sm" data-action="add-set-sheet"><span class="icon">library_add</span>Add a set</button><button class="btn btn-secondary btn-sm" data-action="import-ultimate"><span class="icon">upload_file</span>From my Ultimate backup</button></div>
         <input type="file" id="ultimate-file" accept="application/json,.json" class="hidden">
       </div>
+      </div>
+      <div class="col-b">
       <div class="panel rise" style="--i:4">
         <div class="mk-tools"><input id="mk-search" type="search" placeholder="Search a code or name" autocomplete="off" aria-label="Search markers"></div>
         <div class="fam-row" id="fam-row"></div>
         <div class="mk-grid" id="mk-grid"></div>
       </div>
       <div class="rise" style="--i:5;margin-top:18px"><button class="btn btn-primary btn-big" data-action="chart-mine"><span class="icon">grid_view</span>Make my chart</button></div>
+      </div>
     </section>
 
     <!-- ---------- TIPS ---------- -->
