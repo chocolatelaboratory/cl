@@ -25,7 +25,7 @@ function draw(cv,[id,lab,ls,lw,vs,vw]){const N=1000;cv.width=cv.height=N;const x
  const vx=L.l-Vb.l,vy=L.t-Vb.t; // V origin so ink top-left matches
  const U={l:L.l,r:Math.max(L.r,vx+Vb.r),t:L.t,b:L.b};const W=U.r-U.l,H=U.b-U.t;
  const sc=Math.min(560/W,560/H);const ox=N/2-(U.l+W/2)*sc,oy=N/2-(U.t+H/2)*sc;
- x.save();x.translate(ox,oy);x.scale(sc,sc);x.fillStyle='#1d2147';
+ x.save();x.translate(ox,oy);x.scale(sc,sc);x.fillStyle='#1d2147';const cut=U.t+6/sc;x.beginPath();x.rect(-5000,cut,10000,10000);x.clip();
  x.font=F(ls,lw,S);x.fillText('L',0,0);
  x.save();x.beginPath();x.rect(-5000,-5000,10000,5000+L.b);x.clip();x.font=F(vs,vw,SV);x.fillText('V',vx,vy);x.restore();x.restore();}
 document.fonts.load('300 10px "Cormorant Garamond"').then(()=>Promise.all(V.map(v=>document.fonts.load(F(v[2],v[3],10)).then(()=>document.fonts.load(F(v[4],v[5],10)))))).then(()=>{
