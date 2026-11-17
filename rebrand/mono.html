@@ -1,0 +1,22 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Inter:wght@300&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#fff;font-family:'Cormorant Garamond',serif;font-weight:300;color:#1d2147}
+.i{width:500px;height:500px;position:relative;display:flex;align-items:center;justify-content:center;background:#fff;overflow:hidden}
+.rbg{background:linear-gradient(90deg,#ff7ac8,#ffb36b 18%,#7affc1 38%,#6fd3ff 55%,#9b7bff 72%,rgba(155,123,255,0))}
+.glow{position:absolute;height:3px}.glow::after{content:'';position:absolute;inset:-4px 0;background:inherit;filter:blur(7px);opacity:.9}
+.lab{font-family:Inter;font-size:14px;color:#888;letter-spacing:.1em;padding:6px 0 18px}
+#grid{display:grid;grid-template-columns:repeat(4,500px);gap:0 24px;padding:24px;background:#f2f2f5}
+</style></head><body><div id="grid"></div>
+<script>
+const D=[
+['A · Italic V (current)',`<i style="font-size:330px;padding-right:20px">V</i>`],
+['B · LV side by side',`<span style="font-size:230px;letter-spacing:-.02em">L<i>V</i></span>`],
+['C · LV interlocked',`<span style="font-size:260px;position:relative;display:inline-block;width:300px;height:300px"><span style="position:absolute;left:30px;top:-30px">L</span><i style="position:absolute;left:105px;top:-30px;opacity:.9">V</i></span>`],
+['D · Stacked L over V',`<div style="text-align:center;line-height:.8"><div style="font-size:150px">L</div><i style="font-size:150px">V</i></div>`],
+['E · L | V with divider',`<div style="display:flex;align-items:center;gap:34px;font-size:200px"><span>L</span><span style="width:1px;height:170px;background:#1d2147;opacity:.35"></span><i>V</i></div>`],
+['F · LV + glow line',`<div style="text-align:center"><span style="font-size:210px">L<i>V</i></span><div class="glow rbg" style="position:relative;width:220px;margin:6px auto 0"></div></div>`],
+['G · LV in thin circle',`<div style="width:360px;height:360px;border:1.5px solid rgba(29,33,71,.6);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:170px">L<i>V</i></div>`],
+['H · Wide spaced L·V',`<div style="font-size:150px;letter-spacing:.18em;padding-left:.18em">L<span style="font-size:60px;vertical-align:middle;opacity:.5">·</span><i>V</i></div>`],
+];
+const g=document.getElementById('grid');D.forEach(([t,h],k)=>{g.insertAdjacentHTML('beforeend',`<div><div class="i" id="m${k}">${h}</div><div class="lab">${t}</div></div>`)});
+</script></body></html>

@@ -3,7 +3,9 @@
 <style>body{margin:0;background:#fff}.c{position:relative;overflow:hidden;background:#fff;color:#1d2147;font-family:Inter,sans-serif}
 canvas{position:absolute;inset:0;width:100%;height:100%}.t{position:absolute;z-index:2}
 .n{font-family:'Cormorant Garamond',serif;font-weight:300;letter-spacing:.05em;line-height:1}
-.rb{height:1px;background:linear-gradient(90deg,#ff7ac8,#ffb36b 18%,#7affc1 38%,#6fd3ff 55%,#9b7bff 72%,rgba(155,123,255,0))}
+.rb{position:relative;height:1px;background:linear-gradient(90deg,#ff7ac8,#ffb36b 18%,#7affc1 38%,#6fd3ff 55%,#9b7bff 72%,rgba(155,123,255,0))}
+.rb::after{content:'';position:absolute;left:0;right:0;top:50%;height:300%;transform:translateY(-50%);background:inherit;filter:blur(6px);opacity:.9}
+.rb::before{content:'';position:absolute;left:0;right:0;top:50%;height:900%;transform:translateY(-50%);background:inherit;filter:blur(14px);opacity:.45}
 .cap{letter-spacing:.45em;text-transform:uppercase;font-weight:300;color:#5d6398}</style></head><body>
 <script>
 function mk(id,W,H,html){const el=document.createElement('div');el.className='c';el.id=id;el.style.cssText=`width:${W}px;height:${H}px`;const cv=document.createElement('canvas');el.appendChild(cv);document.body.appendChild(el);
