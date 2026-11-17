@@ -1,0 +1,1936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ohuhu Swatch Chart Maker</title>
+<meta name="theme-color" id="theme-color" content="#FAFAFA">
+<script>
+/* Theme (Light / Dark / Auto), applied before the first paint so dark-mode
+   buyers never see a white flash. Auto follows the phone's setting. */
+(function(){ var t = 'auto'; try{ t = localStorage.getItem('ohuhuSwatchChart_v1:theme') || 'auto'; }catch(e){}
+  var dark = t === 'dark' || (t === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light'); document.documentElement.setAttribute('data-theme-pref', t); })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   Ohuhu Swatch Chart Maker
+   Starter shell for the shop's planner design system.
+   Mobile first: base rules target a ~375px phone; one
+   min-width:900px query adds the desktop sidebar.
+   Warm off-white, sage = progress/completion, terracotta =
+   urgency/celebration, 8-point spacing, 4 type sizes, 2 weights.
+   Everything is stored locally in the browser. Icons are embedded
+   SVG (scripts/embed_icons.py), so the app works fully offline.
+   ============================================================ */
+
+:root{
+  --bg: #FAFAFA;
+  --surface: #FFFFFF;
+
+  --ink: #171717;
+  --ink-body: rgba(23,23,23,.82);
+  --ink-secondary: rgba(23,23,23,.62);
+
+  --border: #E7E5E2;
+  --border-strong: #D6D3CE;
+
+  --sage: #7B9075;
+  --sage-strong: #5F7259;
+  --sage-soft: #EEF2EC;
+
+  --terracotta: #CC8B79;
+  --terracotta-strong: #A65C48;
+  --terracotta-soft: #FBEEE9;
+
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-6: 24px; --sp-8: 32px; --sp-12: 48px;
+
+  --text-xs: 12.5px;
+  --text-sm: 15px;
+  --text-lg: clamp(19px, 17.5px + 0.45vw, 22px);
+  --text-xl: clamp(24px, 20px + 1.1vw, 30px);
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+
+  --ease: cubic-bezier(.4,0,.2,1);
+  --ease-pop: cubic-bezier(.34,1.56,.64,1);
+  /* Motion kit tokens. Default feel sits between Calm and Bold: a small,
+     confident overshoot. A personality can switch with <body data-motion="calm|playful|bold">. */
+  --spring: cubic-bezier(.34,1.3,.64,1);
+  --glide: cubic-bezier(.22,1,.36,1);
+  --press: .96;
+  --dur: .55s;
+  --stagger: 60ms;
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  --shadow-card: 0 1px 2px rgba(23,23,23,.05), 0 1px 1px rgba(23,23,23,.03);
+  --shadow-btn: 0 1px 2px rgba(23,23,23,.16), inset 0 1px 0 rgba(255,255,255,.14);
+
+  /* Roles that flip in dark mode. Use these instead of #fff / var(--ink) in new CSS. */
+  --field: #FFFFFF;          /* inputs, checkbox boxes */
+  --action: var(--ink);      /* primary buttons, active pills, FAB */
+  --on-action: #FFFFFF;
+  --on-nav: #FFFFFF;         /* text on the active nav pill */
+  --toast-bg: var(--ink);
+  color-scheme: light;
+}
+
+/* ---------- DARK MODE ----------
+   html[data-theme="dark"] is set by the head script (Light / Dark / Auto in
+   Settings). Rules: never pure black; surfaces get lighter as they rise
+   (bg < surface < field); accents lighten and desaturate a little so they
+   don't glow; text is off-white; shadows turn into darker drops. A planner
+   with its own palette re-defines its color tokens here too (see
+   personalities.md > Dark mode). */
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --bg: #111214; --surface: #1A1B1E; --field: #232428;
+  --ink: #EDEDEB; --ink-body: rgba(237,237,235,.84); --ink-secondary: rgba(237,237,235,.58);
+  --border: #2C2D31; --border-strong: #3D3E43;
+  --sage: #93A88D; --sage-strong: #B3C6AD; --sage-soft: rgba(147,168,141,.16);
+  --terracotta: #D99A88; --terracotta-strong: #E8B3A4; --terracotta-soft: rgba(217,154,136,.16);
+  --action: #EDEDEB; --on-action: #111214; --on-nav: #111214; --toast-bg: #2E2F34;
+  --shadow-card: 0 1px 2px rgba(0,0,0,.35);
+  --shadow-btn: 0 1px 2px rgba(0,0,0,.4);
+}
+:root[data-theme="dark"] select{ background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23EDEDEB' stroke-opacity='.6' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+:root[data-theme="dark"] .btn-primary:hover{ background: var(--action); filter: brightness(.92); }
+:root[data-theme="dark"] .btn-ghost-danger{ border-color: rgba(232,120,100,.4); color: #EE9A88; }
+:root[data-theme="dark"] .btn-danger-solid{ background: #C4513C; }
+/* Switching theme: one short cross-fade, then transitions are removed again. */
+html.theme-anim, html.theme-anim *{ transition: background-color .3s ease, color .3s ease, border-color .3s ease, fill .3s ease !important; }
+
+/* Appearance setting: Light / Dark / Auto */
+.theme-seg{ display:flex; gap:4px; padding:4px; background: var(--bg); border:1px solid var(--border); border-radius: var(--radius-md); min-width:0; }
+.theme-seg button{ flex:1; min-height:44px; border-radius: var(--radius-sm); font-size: var(--text-xs); font-weight:700; color: var(--ink-secondary); display:flex; align-items:center; justify-content:center; }
+.theme-seg button.active{ background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.14); }
+:root[data-theme="dark"] .theme-seg button.active{ background: var(--field); }
+
+*{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html,body{ margin:0; min-height:100%; }
+html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+body{ background: var(--bg); color: var(--ink-body); font-family: var(--font); font-size: var(--text-sm); line-height: 1.5; -webkit-font-smoothing: antialiased; overflow-x:hidden; }
+button{ font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+button:disabled{ cursor: default; }
+input, select, textarea{ font: inherit; color: inherit; }
+ul, ol{ margin:0; padding:0; list-style:none; }
+p{ margin:0; }
+h1,h2,h3{ margin:0; color: var(--ink); }
+svg{ display:block; }
+:focus-visible{ outline: 2px solid var(--sage); outline-offset: 2px; }
+.num{ font-variant-numeric: tabular-nums; }
+.hidden{ display:none !important; }
+
+/* Every text-like control is styled, so nothing renders as a raw
+   native input. 16px on phones: iOS Safari zooms the whole page
+   when you tap into any field smaller than 16px. */
+textarea, select, input[type=text], input[type=number], input[type=date], input[type=time], input[type=search], input[type=email], input[type=url]{
+  padding: 0 var(--sp-4); border:1px solid var(--border); border-radius: var(--radius-md);
+  font-size: 16px; line-height:1.25; color: var(--ink); background-color: var(--field); width:100%; height:48px; min-width:0;
+  -webkit-appearance:none; appearance:none; margin:0;
+}
+/* Fixed height + zero vertical padding keeps text vertically centered on
+   iOS and Android alike (native padding renders differently per browser). */
+select{ padding-right:40px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23171717' stroke-opacity='.55' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position: right 16px center; background-size:12px 8px; text-overflow:ellipsis; white-space:nowrap; cursor:pointer; }
+input[type=date], input[type=time]{ display:flex; align-items:center; }
+input[type=date]::-webkit-date-and-time-value, input[type=time]::-webkit-date-and-time-value{ text-align:left; margin:0; }
+input::-webkit-calendar-picker-indicator{ opacity:.55; }
+input::placeholder, textarea::placeholder{ color: var(--ink-secondary); opacity:1; }
+textarea{ height:auto; padding: var(--sp-3) var(--sp-4); line-height:1.5; resize: vertical; min-height:96px; }
+textarea:focus, select:focus, input:focus{ outline:none; border-color: var(--sage); box-shadow: 0 0 0 3px var(--sage-soft); }
+
+/* Icons: Material Symbols drawn as inline SVG (embedded by
+   scripts/embed_icons.py), so they work offline and on networks that
+   block Google, with nothing to download. Sized by font-size like the
+   old icon font, colored by currentColor. Active nav items swap to the
+   filled version of the icon. */
+.icon{ display:inline-flex; align-items:center; justify-content:center; width:1em; height:1em; font-size:20px; line-height:1; flex-shrink:0; overflow:hidden; user-select:none; }
+.icon:not(:has(svg)){ visibility:hidden; }
+.icon svg{ width:100%; height:100%; fill:currentColor; display:block; }
+.icon .f{ display:none; }
+.nav-btn.active .icon.has-fill .o, .bottom-nav button.active .icon.has-fill .o{ display:none; }
+.nav-btn.active .icon.has-fill .f, .bottom-nav button.active .icon.has-fill .f{ display:inline; }
+
+
+/* ---------- Layout (mobile first) ---------- */
+.app{ min-height:100vh; min-height:100dvh; }
+.sidebar{ display:none; }
+/* No app-name header bar: the buyer knows which app they opened, and a name
+   pinned top-left is template filler. Each view starts with its own title.
+   Status that must stay visible (a running timer) floats as .float-pill. */
+.float-pill{ position:fixed; top: calc(var(--sp-3) + env(safe-area-inset-top)); right: var(--sp-4); z-index:150; }
+
+.main{ padding: calc(var(--sp-6) + env(safe-area-inset-top)) var(--sp-4) calc(132px + env(safe-area-inset-bottom)); max-width: 1020px; min-width:0; }
+.topbar{ display:flex; align-items:baseline; justify-content:space-between; gap: var(--sp-2); margin-bottom: var(--sp-1); flex-wrap:wrap; }
+.topbar h1{ font-size: var(--text-lg); font-weight:700; letter-spacing:-0.01em; overflow-wrap:anywhere; }
+.topbar .date{ font-size: var(--text-xs); color: var(--ink-secondary); }
+.gentle{ font-size: var(--text-sm); color: var(--ink-secondary); margin-bottom: var(--sp-4); }
+.view-head{ margin-bottom: var(--sp-4); }
+.back-btn{ display:inline-flex; align-items:center; gap: var(--sp-1); font-size: var(--text-xs); font-weight:700; color: var(--ink-secondary); min-height:44px; margin: calc(var(--sp-2) * -1) 0 var(--sp-1); }
+
+.view{ display:none; container-type: inline-size; container-name: view; }
+.view.active{ display:block; animation: fade-in .2s var(--ease); }
+@keyframes fade-in{ from{ opacity:0; transform:translateY(4px); } to{ opacity:1; transform:translateY(0); } }
+
+/* ---------- Building blocks ---------- */
+.panel{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: var(--sp-4); margin-bottom: var(--sp-4); min-width:0; }
+.panel-title{ font-size: var(--text-xs); font-weight:700; color: var(--ink-secondary); margin-bottom: var(--sp-3); }
+.panel-head{ display:flex; align-items:center; justify-content:space-between; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+.panel-head .panel-title{ margin-bottom:0; }
+.section-label{ font-size: var(--text-xs); font-weight:700; color: var(--ink-secondary); margin: 0 0 var(--sp-3); }
+.helper{ font-size: var(--text-xs); color: var(--ink-secondary); line-height:1.5; }
+
+.stack{ display:flex; flex-direction:column; gap: var(--sp-4); margin-bottom: var(--sp-4); }
+.stack > .panel{ margin-bottom:0; }
+
+.btn{ padding: var(--sp-3) var(--sp-4); border-radius: var(--radius-md); font-size: var(--text-sm); font-weight:700; white-space:nowrap; min-height:44px; display:inline-flex; align-items:center; justify-content:center; gap: var(--sp-2); transition: background .15s var(--ease), border-color .15s var(--ease), transform .1s var(--ease); }
+.btn:active{ transform: scale(.97); }
+.btn:disabled{ opacity:.45; }
+.btn .icon{ font-size:19px; }
+.btn-primary{ background: var(--action); color: var(--on-action); box-shadow: var(--shadow-btn); }
+.btn-primary:hover{ background:#000; }
+.btn-secondary{ background: var(--surface); border:1px solid var(--border); color: var(--ink); }
+.btn-secondary:hover{ border-color: var(--border-strong); }
+.btn-sage{ background: var(--sage); color:#fff; box-shadow: var(--shadow-btn); }
+.btn-sage:hover{ background: var(--sage-strong); }
+.btn-danger-solid{ background:#B3402C; color:#fff; }
+.btn-danger-solid:hover{ background:#992F1D; }
+.btn-ghost-danger{ background: var(--surface); border:1px solid #E8C4BB; color:#A24A34; }
+.btn-sm{ padding: var(--sp-2) var(--sp-3); font-size: var(--text-xs); min-height:44px; }
+.btn-block{ width:100%; }
+.btn-row{ display:flex; flex-direction:column; gap: var(--sp-2); }
+
+.icon-btn{ width:44px; height:44px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-radius: var(--radius-sm); color: var(--ink-secondary); }
+.icon-btn .icon{ font-size:18px; }
+.icon-btn:hover{ background: var(--bg); color: var(--ink); }
+
+.link-btn{ font-size: var(--text-xs); font-weight:700; color: var(--sage-strong); padding: var(--sp-2) 0; min-height:44px; min-width:44px; justify-content:center; display:inline-flex; align-items:center; gap: var(--sp-1); }
+
+.empty-state{ text-align:center; padding: var(--sp-8) var(--sp-4); color: var(--ink-secondary); }
+.empty-state .icon{ font-size:28px; margin: 0 auto var(--sp-3); color: var(--border-strong); }
+.empty-state p{ font-size: var(--text-sm); line-height:1.55; max-width:300px; margin:0 auto; }
+.empty-state.compact{ padding: var(--sp-4) var(--sp-2); }
+
+.tag{ display:inline-flex; align-items:center; gap:6px; font-size: var(--text-xs); font-weight:700; padding: 3px var(--sp-2); border-radius:20px; border:1px solid var(--border); color: var(--ink-secondary); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tag.urgent{ background: var(--terracotta-soft); border-color: var(--terracotta-soft); color: var(--terracotta-strong); }
+.tag.soft{ background: var(--bg); }
+.tag.sage{ background: var(--sage-soft); border-color: var(--sage-soft); color: var(--sage-strong); }
+.dot{ width:8px; height:8px; border-radius:50%; display:inline-block; flex-shrink:0; }
+
+/* Checkbox: the check is drawn in CSS so it never depends on a font.
+   The button is 44px (tap target); the visible box inside is 30px. */
+.check-hit{ width:44px; height:44px; flex-shrink:0; display:flex; align-items:center; justify-content:center; margin: -4px; }
+.checkbox{ width:30px; height:30px; border-radius:8px; border:1.5px solid var(--border-strong); flex-shrink:0; background: var(--field); display:flex; align-items:center; justify-content:center; transition: background .15s var(--ease), border-color .15s var(--ease), transform .25s var(--ease-pop); }
+.checkbox::after{ content:''; width:6px; height:11px; border:solid #fff; border-width:0 2.5px 2.5px 0; margin-top:-3px; opacity:0; transform: rotate(45deg) scale(.4); transition: opacity .15s var(--ease), transform .2s var(--ease-pop); }
+.checkbox.checked{ background: var(--sage); border-color: var(--sage); }
+.checkbox.checked::after{ opacity:1; transform: rotate(45deg) scale(1); }
+
+.row-list > li{ display:flex; align-items:center; gap: var(--sp-3); padding: var(--sp-2) var(--sp-1); border-bottom:1px solid var(--border); min-width:0; }
+.row-list > li:last-child{ border-bottom:none; }
+.row-list > li.done .row-title{ text-decoration: line-through; color: var(--ink-secondary); }
+.row-body{ flex:1; min-width:0; }
+.row-title{ font-size: var(--text-sm); color: var(--ink-body); overflow-wrap:anywhere; }
+.row-meta{ display:flex; gap: var(--sp-2); margin-top: var(--sp-1); flex-wrap:wrap; font-size: var(--text-xs); color: var(--ink-secondary); }
+.row-end{ font-size: var(--text-xs); color: var(--ink-secondary); flex-shrink:0; }
+
+/* Stats: min-width:0 lets grid cells shrink instead of pushing the
+   page wider than the screen when a number is long. */
+.stat-row{ display:grid; gap: var(--sp-2); grid-template-columns: 1fr; margin-bottom: var(--sp-4); }
+.stat-row.cols-2, .stat-row.cols-4{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+.stat-box{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius-md); padding: var(--sp-3) var(--sp-4); min-width:0; }
+.stat-num{ font-size: var(--text-lg); font-weight:700; color: var(--ink); overflow-wrap:anywhere; font-variant-numeric: tabular-nums; }
+.stat-label{ font-size: var(--text-xs); color: var(--ink-secondary); margin-top: var(--sp-1); }
+
+/* Forms */
+.form-stack{ display:flex; flex-direction:column; gap: var(--sp-2); min-width:0; }
+.form-row-2{ display:flex; gap: var(--sp-2); min-width:0; }
+.form-row-2 > *{ flex:1; min-width:0; }
+/* Smallest phones: paired fields stack so nothing gets cut off */
+@media (max-width: 359px){ .form-row-2{ flex-direction:column; } .form-row-2 > *{ flex:none; } }
+.field-col{ display:flex; flex-direction:column; gap: var(--sp-1); min-width:0; }
+.field-col > span{ font-size: var(--text-xs); font-weight:700; color: var(--ink-secondary); }
+.field-label{ font-size: var(--text-xs); font-weight:700; color: var(--ink-secondary); margin: var(--sp-2) 0 calc(var(--sp-1) * -1); }
+.inline-form{ display:flex; gap: var(--sp-2); min-width:0; }
+.inline-form input{ flex:1; }
+.inline-form .btn{ flex-shrink:0; }
+
+.disclosure{ display:flex; align-items:center; justify-content:space-between; width:100%; font-size: var(--text-sm); font-weight:700; color: var(--ink); min-height:44px; text-align:left; }
+.disclosure .chev{ transition: transform .2s var(--ease); color: var(--ink-secondary); font-size:14px; }
+.disclosure.open .chev{ transform: rotate(180deg); }
+.disclosure-body{ margin-top: var(--sp-3); }
+
+/* Pills (horizontal scroll on phones instead of wrapping into a mess) */
+.pill-row{ display:flex; gap: var(--sp-2); overflow-x:auto; padding-bottom: var(--sp-1); -webkit-overflow-scrolling: touch; scrollbar-width:none; min-width:0; }
+.pill-row::-webkit-scrollbar{ display:none; }
+.pill-row.wrap{ flex-wrap:wrap; overflow-x:visible; }
+.pill{ padding: var(--sp-2) var(--sp-4); min-height:44px; border-radius:22px; border:1px solid var(--border); font-size: var(--text-xs); font-weight:700; color: var(--ink-secondary); background: var(--surface); flex-shrink:0; white-space:nowrap; display:inline-flex; align-items:center; gap:6px; }
+.pill.active{ background: var(--action); color: var(--on-action); border-color: var(--action); }
+.pill:disabled{ opacity:.45; }
+.pill .count{ opacity:.7; font-variant-numeric: tabular-nums; }
+
+/* ---------- "Right now" card: the one thing to look at first ---------- */
+.rightnow{ background: var(--surface); border:1px solid var(--border); border-left:4px solid var(--terracotta); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: var(--sp-4); margin-bottom: var(--sp-4); }
+.rightnow.calm{ border-left-color: var(--sage); }
+.rightnow-label{ display:inline-flex; align-items:center; gap:6px; font-size: var(--text-xs); font-weight:700; color: var(--terracotta-strong); margin-bottom: var(--sp-2); }
+.rightnow.calm .rightnow-label{ color: var(--sage-strong); }
+.rightnow-label .icon{ font-size:16px; }
+.rightnow-title{ font-size: var(--text-lg); font-weight:700; line-height:1.3; overflow-wrap:anywhere; }
+.rightnow .btn-row{ margin-top: var(--sp-4); }
+
+/* ---------- Module hub (for planners with many modules) ----------
+   Bottom nav holds the 4-5 sections; each section view is a grid of
+   module cards; tapping a card opens that module's view. */
+.module-grid{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: var(--sp-2); margin-bottom: var(--sp-4); }
+.module-card{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-card); padding: var(--sp-3); min-height:96px; display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; gap: var(--sp-2); text-align:left; min-width:0; transition: border-color .15s var(--ease), transform .1s var(--ease); }
+.module-card:active{ transform: scale(.98); }
+.module-card:hover{ border-color: var(--border-strong); }
+.module-card .mc-icon{ width:36px; height:36px; border-radius: var(--radius-sm); background: var(--sage-soft); color: var(--sage-strong); display:flex; align-items:center; justify-content:center; }
+.module-card .mc-icon .icon{ font-size:20px; }
+.module-card .mc-name{ font-size: var(--text-sm); font-weight:700; color: var(--ink); overflow-wrap:anywhere; line-height:1.3; }
+.module-card .mc-meta{ font-size: var(--text-xs); color: var(--ink-secondary); }
+
+/* ---------- Charts (pure CSS/SVG, no libraries) ---------- */
+.bar-chart{ display:flex; align-items:flex-end; gap: var(--sp-2); height:140px; padding-top: var(--sp-4); }
+.bar-col{ flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap: var(--sp-1); }
+.bar-value{ font-size:11px; font-weight:700; color: var(--ink-secondary); font-variant-numeric: tabular-nums; }
+.bar-fill{ width:100%; max-width:30px; background: var(--sage-soft); border-radius:6px 6px 2px 2px; min-height:3px; transition: height .4s var(--ease); }
+.bar-fill.has{ background: var(--sage); }
+.bar-fill.today{ background: var(--terracotta); }
+.bar-label{ font-size: 11px; color: var(--ink-secondary); text-align:center; white-space:nowrap; }
+
+.hbar-row{ display:flex; align-items:center; gap: var(--sp-3); padding: var(--sp-2) 0; min-width:0; }
+.hbar-label{ width:104px; flex-shrink:0; font-size: var(--text-xs); color: var(--ink-body); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.hbar-track{ flex:1; min-width:0; height:10px; background: var(--bg); border-radius:6px; overflow:hidden; }
+.hbar-fill{ height:100%; border-radius:6px; background: var(--sage); }
+.hbar-value{ min-width:44px; text-align:right; font-size: var(--text-xs); color: var(--ink-secondary); flex-shrink:0; font-variant-numeric: tabular-nums; }
+
+.progress-bar{ height:6px; background: var(--bg); border-radius:4px; overflow:hidden; margin-top: var(--sp-2); }
+.progress-bar > div{ height:100%; background: var(--sage); border-radius:4px; transition: width .3s var(--ease); }
+
+.insight-callout{ padding: var(--sp-3); background: var(--sage-soft); color: var(--sage-strong); border-radius: var(--radius-sm); font-size: var(--text-sm); margin-bottom: var(--sp-3); }
+
+/* ---------- Settings ---------- */
+.settings-group{ margin-bottom: var(--sp-6); }
+.settings-row{ display:flex; flex-direction:column; align-items:stretch; gap: var(--sp-2); padding: var(--sp-3) 0; border-bottom:1px solid var(--border); min-width:0; }
+.settings-row:last-child{ border-bottom:none; }
+.settings-row.inline{ flex-direction:row; align-items:center; justify-content:space-between; }
+.settings-row-title{ font-size: var(--text-sm); font-weight:700; color: var(--ink); }
+.settings-row-desc{ font-size: var(--text-xs); color: var(--ink-secondary); margin-top:2px; }
+.settings-row .btn{ width:100%; }
+
+/* 44px tall tap target; the visible track is drawn inside it */
+.switch{ position:relative; width:56px; height:44px; flex-shrink:0; }
+.switch::before{ content:''; position:absolute; top:7px; left:3px; width:50px; height:30px; border-radius:15px; background: var(--border-strong); transition: background .2s var(--ease); }
+.switch::after{ content:''; position:absolute; top:10px; left:6px; width:24px; height:24px; border-radius:50%; background:#fff; box-shadow: 0 1px 2px rgba(0,0,0,.2); transition: transform .2s var(--ease); }
+.switch.on::before{ background: var(--sage); }
+.switch.on::after{ transform: translateX(20px); }
+
+/* ---------- Toasts, modal, sheet, FAB, confetti ---------- */
+#toast-container{ position:fixed; bottom: calc(150px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); display:flex; flex-direction:column; gap: var(--sp-2); z-index:400; align-items:center; width: calc(100% - 32px); max-width:380px; pointer-events:none; }
+.toast{ background: var(--toast-bg); color:#fff; padding: var(--sp-3) var(--sp-4); border-radius:22px; font-size: var(--text-xs); font-weight:700; display:flex; align-items:center; justify-content:space-between; gap: var(--sp-4); box-shadow: 0 8px 24px rgba(0,0,0,.18); animation: toast-in .5s var(--spring); width:100%; pointer-events:auto; }
+.toast-action{ color: var(--terracotta); font-weight:700; font-size: var(--text-xs); flex-shrink:0; min-height:32px; }
+@keyframes toast-in{ from{ opacity:0; transform:translateY(16px) scale(.92); } to{ opacity:1; transform:none; } }
+
+.overlay{ position:fixed; inset:0; background: rgba(23,23,23,.45); display:flex; align-items:flex-end; justify-content:center; z-index:500; }
+.sheet{ background: var(--surface); border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding: var(--sp-6) var(--sp-4) calc(var(--sp-8) + env(safe-area-inset-bottom)); max-width:480px; width:100%; max-height:90vh; max-height:90dvh; overflow-y:auto; overscroll-behavior:contain; }
+.sheet h3{ font-size: var(--text-lg); font-weight:700; margin-bottom: var(--sp-2); }
+.sheet p{ font-size: var(--text-sm); color: var(--ink-secondary); line-height:1.55; }
+.modal-actions{ display:flex; flex-direction:column-reverse; gap: var(--sp-2); margin-top: var(--sp-6); }
+.modal-actions .btn{ width:100%; }
+#modal-confirm-input{ margin-top: var(--sp-3); }
+
+.fab{ position:fixed; right: var(--sp-4); bottom: calc(96px + env(safe-area-inset-bottom)); width:56px; height:56px; border-radius:18px; background: var(--action); color: var(--on-action); box-shadow: 0 6px 18px rgba(23,23,23,.22); display:flex; align-items:center; justify-content:center; z-index:250; font-size:26px; line-height:1; }
+.fab .icon{ font-size:26px; }
+.fab:active{ transform: scale(.95); }
+
+#confetti-layer{ position:fixed; inset:0; pointer-events:none; z-index:600; overflow:hidden; }
+.confetti-piece{ position:absolute; border-radius:3px; opacity:0; animation: confetti-fall 900ms ease-out forwards; }
+@keyframes confetti-fall{ 0%{ opacity:1; transform: translateY(0) rotate(0deg); } 100%{ opacity:0; transform: translateY(140px) rotate(200deg); } }
+
+/* ---------- Bottom nav: floating tab bar (max 5 items fits 320px phones cleanly).
+   Inset from the edges with a soft blur; the active tab is a solid pill in
+   --nav-active (defaults to --sage-strong; a custom palette can override it). ---------- */
+.bottom-nav{ display:flex; position:fixed; left:12px; right:12px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index:300; justify-content:space-around; gap:2px; padding:6px; border:1px solid var(--border); border-radius:26px; background: color-mix(in srgb, var(--surface) 94%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(23,23,23,.10); }
+.bottom-nav button{ flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; font-size:10.5px; font-weight:700; color: var(--ink-secondary); padding: 6px 2px; border-radius:20px; min-height:52px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; transition: background .2s var(--ease), color .2s var(--ease); }
+.bottom-nav button.active{ background: var(--nav-active, var(--sage-strong)); color: var(--on-nav); }
+/* Motion kit: the active pill glides between tabs (buildNav adds .nav-pill; once it is placed the
+   buttons go transparent). The active icon lifts a touch on a spring. */
+.bottom-nav{ isolation:isolate; }
+.bottom-nav .nav-pill{ position:absolute; top:6px; bottom:6px; left:0; width:0; border-radius:20px; background: var(--nav-active, var(--sage-strong)); z-index:-1; opacity:0; transition: transform var(--dur) var(--spring), width var(--dur) var(--spring); }
+.bottom-nav.glide .nav-pill{ opacity:1; }
+.bottom-nav.glide button.active{ background:transparent; }
+.bottom-nav button .icon{ transition: transform var(--dur) var(--spring); }
+.bottom-nav button.active .icon{ transform: translateY(-1px) scale(1.08); }
+.bottom-nav button .icon{ font-size:22px; }
+.bottom-nav button.active .icon{ font-variation-settings: 'FILL' 1; }
+
+/* ---------- v2: shared layout helpers ---------- */
+/* Filters / stacked form controls above a list: even 12px rhythm */
+.filter-stack{ display:flex; flex-direction:column; gap: var(--sp-3); margin-bottom: var(--sp-4); min-width:0; }
+.filter-stack > .form-row-2{ gap: var(--sp-3); }
+
+/* Summary strip: aligned label/value cells instead of a loose line of text.
+   Use for totals above a list (In / Out / Net / Owed, Done / Left...). */
+.summary-stats{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:1px; background: var(--border); border:1px solid var(--border); border-radius: var(--radius-md); overflow:hidden; margin-bottom: var(--sp-4); }
+.summary-stats > div{ background: var(--surface); padding: var(--sp-3) var(--sp-4); min-width:0; }
+.summary-stats .k{ display:block; font-size: var(--text-xs); color: var(--ink-secondary); font-weight:700; }
+.summary-stats .v{ display:block; font-size: var(--text-sm); font-weight:700; color: var(--ink); font-variant-numeric: tabular-nums; margin-top:2px; overflow-wrap:anywhere; }
+@container view (min-width: 440px){ .summary-stats.cols-4{ grid-template-columns: repeat(4, minmax(0,1fr)); } }
+
+/* Progress ring: the center holds ONE short value (e.g. "74%") and a one-word
+   label. Longer detail ("$20,476 of $20,000") goes in .donut-detail below the
+   ring, never inside it. */
+.donut-wrap{ display:flex; flex-direction:column; align-items:center; gap: var(--sp-2); }
+.donut{ position:relative; width:150px; height:150px; flex-shrink:0; }
+.donut svg{ width:100%; height:100%; transform: rotate(-90deg); }
+.donut-center{ position:absolute; inset:22px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; overflow:hidden; }
+.donut-center .big{ font-size: var(--text-xl); font-weight:700; color: var(--ink); font-variant-numeric: tabular-nums; line-height:1.1; white-space:nowrap; }
+.donut-center .small{ font-size: var(--text-xs); color: var(--ink-secondary); white-space:nowrap; }
+.donut-detail{ font-size: var(--text-sm); font-weight:700; color: var(--ink); text-align:center; font-variant-numeric: tabular-nums; }
+.donut-detail + .helper{ text-align:center; }
+
+/* Container-driven grids: 2 columns on phones, 4 when the view is wide */
+@container view (min-width: 560px){
+  .stat-row.cols-4{ grid-template-columns: repeat(4, minmax(0,1fr)); }
+}
+
+/* Tablets (600-899px): roomier gutters, centered column, inline buttons */
+@media (min-width: 600px){
+  .main{ padding-left: var(--sp-6); padding-right: var(--sp-6); max-width: 760px; margin-left:auto; margin-right:auto; }
+  .btn-row{ flex-direction:row; flex-wrap:wrap; }
+}
+
+/* High contrast: buyers who turn this on in their phone settings */
+@media (prefers-contrast: more){
+  :root{ --ink-body:#171717; --ink-secondary: rgba(23,23,23,.86); --border:#8E8B86; --border-strong:#5F5C57; }
+  .btn-secondary, .pill, .tag, .panel, .stat-box{ border-color: var(--border-strong); }
+}
+
+
+/* ---------- Base motion (every personality) ----------
+   .rise: staggered entrance for a view's sections (set --i: 0,1,2...).
+   [data-count]: numbers count up from 0 when a view renders (countUp()).
+   Buttons and cards give a small press. Reduced-motion turns all of it off. */
+.rise{ animation: rise var(--dur) var(--glide) both; animation-delay: calc(var(--i,0) * var(--stagger) + 40ms); }
+/* No filter:blur in entrances: blurring many layers at once stutters on phones. */
+@keyframes rise{ from{ opacity:0; transform: translateY(14px) scale(.985); } }
+.btn, .panel[data-action], .rec-head, .bottom-nav button, .fab{ transition-property: transform, background, color, border-color, box-shadow; }
+.btn:active, .fab:active, .bottom-nav button:active{ transform: scale(.96); }
+
+/* ---------- MOTION KIT (premium feel, every planner) ----------
+   Springy press on everything tappable, sheets that spring up and drag down,
+   check-off ripple + sparks + a tiny vibration (motionBurst), rolling numbers
+   (rollNumber), springy toasts and a gliding nav pill. Performance rules: only
+   transform and opacity animate; no filter:blur, no animated backdrop-filter. */
+body[data-motion="calm"]   { --spring: cubic-bezier(.25,1,.5,1); --press:.985; --dur:.8s; --stagger:90ms; }
+body[data-motion="playful"]{ --spring: cubic-bezier(.3,1.75,.6,1); --press:.93; --dur:.6s; --stagger:55ms; }
+body[data-motion="bold"]   { --spring: cubic-bezier(.4,1.3,.6,1); --press:.95; --dur:.4s; --stagger:40ms; }
+.btn, .pill, .icon-btn, .fab, .module-card, .check-hit, .tap{ transition: transform .45s var(--spring), background .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease), box-shadow .3s var(--glide); }
+.btn:active, .pill:active, .icon-btn:active, .fab:active, .module-card:active, .tap:active{ transform: scale(var(--press)); transition-duration:.12s; }
+.checkbox.checked{ transform: scale(1.06); }
+.overlay:not(.hidden){ animation: scrim-in .3s var(--glide) both; }
+.overlay:not(.hidden) > .sheet{ animation: sheet-up var(--dur) var(--spring) both; touch-action: pan-y; }
+@keyframes scrim-in{ from{ background: rgba(23,23,23,0); } }
+@keyframes sheet-up{ from{ transform: translateY(100%); } }
+.check-hit, .motion-host{ position:relative; }
+.m-ripple{ position:absolute; left:50%; top:50%; width:30px; height:30px; margin:-15px 0 0 -15px; border-radius:50%; background: var(--sage); opacity:.35; pointer-events:none; animation: m-rip .6s var(--glide) forwards; }
+@keyframes m-rip{ to{ transform: scale(2.6); opacity:0; } }
+.m-spark{ position:absolute; left:50%; top:50%; width:5px; height:5px; margin:-2.5px 0 0 -2.5px; border-radius:50%; pointer-events:none; animation: m-spark .6s var(--glide) forwards; }
+@keyframes m-spark{ to{ transform: translate(var(--x), var(--y)) scale(.3); opacity:0; } }
+.roll{ display:inline-flex; overflow:hidden; height:1.1em; line-height:1.1; vertical-align:bottom; }
+.roll .roll-col{ display:flex; flex-direction:column; transition: transform .9s var(--spring); }
+.roll .roll-col > span{ height:1.1em; }
+.num{ font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{ animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+/* ============================================================
+   DESKTOP
+   ============================================================ */
+@media (min-width: 900px){
+  .app{ display:flex; }
+  .bottom-nav, .fab{ display:none; }
+  #toast-container{ bottom: var(--sp-6); }
+
+  .sidebar{ display:flex; width:240px; flex-shrink:0; flex-direction:column; background: var(--surface); border-right:1px solid var(--border); padding: var(--sp-6) var(--sp-3); position:sticky; top:0; height:100vh; height:100dvh; overflow-y:auto; }
+  .nav-list{ display:flex; flex-direction:column; gap: var(--sp-1); }
+  .nav-btn{ display:flex; align-items:center; gap: var(--sp-3); width:100%; padding: var(--sp-3); border-radius: var(--radius-sm); color: var(--ink-secondary); font-size: var(--text-sm); font-weight:700; text-align:left; transition: background .15s var(--ease), color .15s var(--ease); }
+  .nav-btn:hover{ background: var(--bg); color: var(--ink); }
+  .nav-btn.active{ background: var(--sage-soft); color: var(--sage-strong); }
+  .nav-btn .icon{ font-size:20px; }
+  .nav-btn.active .icon{ font-variation-settings: 'FILL' 1; }
+  .sidebar-footer{ margin-top:auto; padding: var(--sp-3) var(--sp-3) 0; border-top:1px solid var(--border); font-size: var(--text-xs); color: var(--ink-secondary); }
+
+  .main{ flex:1; padding: var(--sp-8) var(--sp-8) 64px; max-width: 1020px; margin-left:0; margin-right:0; }
+  .topbar h1{ font-size: var(--text-xl); }
+  .panel{ padding: var(--sp-6); }
+  .stack{ flex-direction:row; align-items:flex-start; }
+  .stack > *{ flex:1; min-width:0; }
+  .stat-row.cols-4{ grid-template-columns: repeat(4, minmax(0,1fr)); }
+  .stat-num{ font-size: var(--text-xl); }
+  .module-grid{ grid-template-columns: repeat(3, minmax(0,1fr)); }
+
+  textarea, select, input[type=text], input[type=number], input[type=date], input[type=time], input[type=search], input[type=email], input[type=url]{ font-size: var(--text-sm); }
+  .btn-row{ flex-direction:row; flex-wrap:wrap; }
+  .settings-row{ flex-direction:row; align-items:center; justify-content:space-between; }
+  .settings-row .btn{ width:auto; min-width:150px; }
+  .settings-row .theme-seg{ width:260px; flex-shrink:0; }
+
+  .icon-btn{ width:36px; height:36px; }
+  .check-hit{ width:32px; height:32px; margin:0; }
+  .checkbox{ width:24px; height:24px; border-radius:7px; }
+  .checkbox::after{ width:5px; height:10px; margin-top:-2px; }
+
+  .overlay{ align-items:center; padding: var(--sp-4); }
+  .sheet{ border-radius: var(--radius-lg); max-width:420px; padding: var(--sp-6); }
+  .modal-actions{ flex-direction:row; justify-content:flex-end; }
+  .modal-actions .btn{ width:auto; }
+}
+/* Icon + text on one line: line the icon up with the CAPITAL letters, not
+   the line box. Centering on the line box looks off by 1-2px because each
+   font (and each phone's rounding at small sizes) puts the letters at a
+   slightly different height in their line. Aligning to the baseline and
+   lifting by half the cap height is exact in any font, online or offline.
+   Every row-style element with an icon beside text uses this: the shared
+   classes below, plus .ic-text for any new component. Buttons whose icon
+   sits ABOVE the text (column layout) add .stacked to opt out. */
+@property --pcap{ syntax:'<length>'; inherits:true; initial-value:0px; }
+@supports (height: 1cap){
+  .ic-text, .tag, .pill, .link-btn, .back-btn, .rightnow-label, .nav-btn, .btn:not(.stacked){ align-items: baseline; flex-wrap: wrap; align-content: center; --pcap: 1cap; }
+  .ic-text > .icon, .tag > .icon, .pill > .icon, .link-btn > .icon, .back-btn > .icon, .rightnow-label > .icon, .nav-btn > .icon, .btn:not(.stacked) > .icon{ translate: 0 calc(50% - var(--pcap) / 2); }
+}
+/* Icon above text: center both. (opticalCenter() also fixes column buttons that forgot .stacked.) */
+.btn.stacked{ align-items:center; }
+</style>
+<style id="app-style">
+/* ============================================================
+   PERSONALITY: Playful (the Ultimate's sibling), with swaps: the hero is a
+   live paper preview of the chart instead of a big number, choice cards
+   with mini page thumbnails, and a printer-friendly "paper" look. Ultimate
+   violet palette (#6C4BD8), spectrum gradient, ledge shadows, bouncy springs.
+   ============================================================ */
+:root{
+  --c-900:#1C182B; --c-700:#42307E; --c-500:#6C4BD8; --c-300:#C3B7EC; --c-100:#F2EFFB;
+  --sage: var(--c-500); --sage-strong: var(--c-700); --sage-soft: var(--c-100);
+  --nav-active: var(--c-500); --on-nav:#FFFFFF;
+  --terracotta:#E8735A; --terracotta-strong:#B4462F; --terracotta-soft:#FDECE7;
+  --bg:#F9F7FE; --surface:#FFFFFF; --field:#FFFFFF; --ink:#1E1830; --ink-body: rgba(30,24,48,.84); --ink-secondary:#625A75; --ink-3:#8E87A1;
+  --border:#E9E4F6; --border-strong:#D5CDEB; --ledge:#E3DDF3;
+  --action: var(--c-500); --on-action:#FFFFFF; --toast-bg:#2A2340;
+  --grad: linear-gradient(135deg, #FF9A5C 0%, #EE4F86 36%, #7A4FE0 70%, #2F8FE0 100%);
+  --shadow-ledge: 0 3px 0 var(--ledge);
+  --paper-shadow: 0 10px 30px rgba(60,40,130,.18), 0 2px 6px rgba(60,40,130,.10);
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --c-700:#C9BBFF; --c-500:#9A82F0; --c-300:#5B4A9C; --c-100:rgba(154,130,240,.16);
+  --nav-active:#9A82F0; --on-nav:#15121C;
+  --bg:#15121C; --surface:#211C2B; --field:#2A2436; --ink:#F2EDF8; --ink-body: rgba(242,237,248,.86); --ink-secondary:#B3ABC4; --ink-3:#8E86A2;
+  --border:#2F2940; --border-strong:#41395A; --ledge:#0C0A12;
+  --action:#9A82F0; --on-action:#15121C; --toast-bg:#332B47;
+  --terracotta:#EE9A88; --terracotta-strong:#F2B2A3; --terracotta-soft: rgba(238,154,136,.16);
+  --paper-shadow: 0 10px 30px rgba(0,0,0,.45);
+}
+body{ background: var(--bg); }
+h1, h2, h3{ letter-spacing:-.02em; }
+.panel{ border:none; border-radius:24px; box-shadow: var(--shadow-ledge); padding:18px; }
+.panel-title{ font-size:18px; font-weight:700; color: var(--ink); letter-spacing:-.02em; margin:0; }
+.panel-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
+.step{ display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%; background: var(--c-100); color: var(--c-700); font-size:13px; font-weight:800; margin-right:8px; flex-shrink:0; }
+.ptitle{ display:flex; align-items:center; min-width:0; }
+.sub-note{ font-size:13px; color: var(--ink-secondary); margin:0 0 12px; }
+.view.settled .rise{ animation:none; }
+
+/* view header */
+.vhead{ display:flex; align-items:flex-end; justify-content:space-between; gap:10px; margin: 4px 0 16px; }
+.vhead .eyebrow{ font-size:13px; font-weight:600; color: var(--ink-3); }
+.vhead h1{ font-size:27px; font-weight:800; letter-spacing:-.03em; line-height:1.1; margin:2px 0 0; color: var(--ink); }
+
+/* hero: live paper preview on the spectrum */
+.hero{ position:relative; overflow:hidden; border-radius:28px; padding:18px 18px 16px; background: var(--grad); color:#fff; margin-bottom:16px; }
+.hero .sun{ position:absolute; right:-50px; top:-60px; width:220px; height:220px; border-radius:50%; background: radial-gradient(circle, rgba(255,255,255,.35), rgba(255,255,255,0) 65%); pointer-events:none; }
+.hero-top{ position:relative; display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+.hero-top .what{ min-width:0; }
+.hero-top .what b{ display:block; font-size:20px; font-weight:800; letter-spacing:-.02em; line-height:1.15; overflow-wrap:anywhere; }
+.hero-top .what span{ display:block; font-size:13.5px; font-weight:600; opacity:.9; margin-top:2px; }
+.paper-wrap{ position:relative; margin-top:14px; display:flex; justify-content:center; }
+.paper{ position:relative; background:#fff; border-radius:6px; box-shadow: var(--paper-shadow); overflow:hidden; }
+.paper .page-scale{ transform-origin: 0 0; position:absolute; left:0; top:0; }
+.pager{ position:relative; display:flex; align-items:center; justify-content:center; gap:10px; margin-top:12px; }
+.pager button{ width:44px; height:44px; border-radius:50%; background: rgba(255,255,255,.22); color:#fff; display:grid; place-items:center; }
+.pager button:disabled{ opacity:.35; }
+.pager span{ font-weight:700; font-size:14px; min-width:90px; text-align:center; }
+.print-cta{ width:100%; margin-top:14px; min-height:52px; border-radius:20px; background:#fff; color: var(--c-700); font-weight:800; font-size:16px; box-shadow: 0 4px 0 rgba(60,40,130,.25); display:flex; align-items:center; justify-content:center; padding:0 18px; }
+.print-cta:active{ transform: translateY(3px); box-shadow: 0 1px 0 rgba(60,40,130,.25); }
+:root[data-theme="dark"] .hero{ filter: saturate(.9) brightness(.92); }
+:root[data-theme="dark"] .print-cta{ background:#F2EDF8; color:#2A1F55; }
+
+/* segmented controls */
+.seg{ display:flex; gap:4px; padding:4px; background: var(--bg); border-radius:16px; }
+.seg button{ flex:1; min-height:44px; border-radius:12px; font-size:14px; font-weight:700; color: var(--ink-secondary); display:flex; align-items:center; justify-content:center; text-align:center; padding:0 6px; }
+.seg button.on{ background: var(--surface); color: var(--c-700); box-shadow: 0 2px 0 var(--ledge); }
+:root[data-theme="dark"] .seg button.on{ background: var(--field); }
+
+/* set chips */
+.set-group{ font-size:12.5px; font-weight:700; color: var(--ink-3); text-transform:uppercase; letter-spacing:.06em; margin:14px 2px 8px; }
+.set-grid{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:8px; }
+@media (max-width:359px){ .set-grid{ grid-template-columns: 1fr; } }
+.setbtn{ display:flex; align-items:center; gap:10px; min-height:56px; padding:8px 10px; border-radius:16px; background: var(--bg); border:2px solid transparent; text-align:left; min-width:0; transition: transform .15s var(--spring), border-color .2s, background .2s; }
+.setbtn:active{ transform: scale(.97); }
+.setbtn .dots{ display:grid; grid-template-columns: repeat(3, 9px); gap:2px; flex-shrink:0; }
+.setbtn .dots i{ width:9px; height:9px; border-radius:3px; display:block; }
+.setbtn .t{ min-width:0; flex:1; }
+.setbtn .t b{ display:block; font-size:14px; font-weight:700; color: var(--ink); line-height:1.2; }
+.setbtn .t span{ display:block; font-size:12.5px; color: var(--ink-secondary); }
+.setbtn.on{ background: var(--c-100); border-color: var(--c-500); }
+.mine-row{ display:flex; align-items:center; gap:12px; margin-top:12px; padding:12px; border-radius:18px; background: var(--bg); border:2px solid transparent; width:100%; text-align:left; }
+.mine-row.on{ background: var(--c-100); border-color: var(--c-500); }
+.mine-row .emo{ font-size:26px; }
+.mine-row .t{ flex:1; min-width:0; }
+.mine-row .t b{ display:block; font-size:15px; color: var(--ink); }
+.mine-row .t span{ display:block; font-size:13px; color: var(--ink-secondary); }
+.emo{ font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif; line-height:1; font-style:normal; }
+
+/* layout choice cards with tiny page drawings */
+.choices{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:8px; }
+.choice{ display:flex; flex-direction:column; align-items:center; gap:6px; padding:10px 6px 10px; border-radius:18px; background: var(--bg); border:2px solid transparent; text-align:center; min-width:0; }
+.choice.on{ background: var(--c-100); border-color: var(--c-500); }
+.choice .mini-page{ width:46px; height:60px; background:#fff; border-radius:4px; box-shadow: 0 1px 3px rgba(0,0,0,.18); padding:4px; display:grid; gap:2px; align-content:start; }
+.choice .mini-page i{ display:block; border-radius:1.5px; }
+.choice b{ font-size:13.5px; color: var(--ink); line-height:1.2; }
+.choice span{ font-size:11.5px; color: var(--ink-secondary); line-height:1.25; }
+
+/* switches */
+.opt{ display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:52px; padding:6px 0; border-top:1px solid var(--border); }
+.opt:first-child{ border-top:none; }
+.opt .t{ min-width:0; flex:1; }
+.opt .t b{ display:block; font-size:15px; color: var(--ink); font-weight:600; }
+.opt .t span{ display:block; font-size:12.5px; color: var(--ink-secondary); }
+.switch{ position:relative; width:52px; height:32px; border-radius:16px; background: var(--border-strong); flex-shrink:0; transition: background .2s; }
+.switch::after{ content:''; position:absolute; left:3px; top:3px; width:26px; height:26px; border-radius:50%; background:#fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .25s var(--spring); }
+.switch.on{ background: var(--c-500); }
+.switch.on::after{ transform: translateX(20px); }
+.switch-hit{ display:flex; align-items:center; justify-content:flex-end; min-width:60px; min-height:44px; }
+.field-row{ display:flex; flex-direction:column; gap:6px; margin-top:12px; }
+.field-row label{ font-size:13px; font-weight:700; color: var(--ink-secondary); }
+.field-row input{ width:100%; min-height:48px; border-radius:14px; border:1px solid var(--border); background: var(--field); padding:0 14px; font-size:16px; color: var(--ink); }
+
+/* my markers */
+.mk-tools{ display:flex; gap:8px; align-items:center; margin-bottom:10px; }
+.mk-tools input{ flex:1; min-width:0; min-height:48px; border-radius:14px; border:1px solid var(--border); background: var(--field); padding:0 14px; font-size:16px; color: var(--ink); }
+.fam-row{ display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; margin: 0 -16px 10px; padding: 2px 16px; }
+.fam-row::-webkit-scrollbar{ display:none; }
+.fam{ flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:44px; min-width:48px; padding:0 14px; border-radius:20px; background: var(--bg); font-size:13px; font-weight:700; color: var(--ink-secondary); }
+.fam i{ width:12px; height:12px; border-radius:50%; display:block; }
+.fam.on{ background: var(--c-500); color:#fff; }
+:root[data-theme="dark"] .fam.on{ color:#15121C; }
+.mk-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap:8px; }
+.mk{ position:relative; display:flex; flex-direction:column; align-items:center; gap:4px; padding:6px 2px 6px; border-radius:14px; background: var(--bg); min-height:76px; border:2px solid transparent; }
+.mk .dot{ width:36px; height:36px; border-radius:50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); display:grid; place-items:center; }
+.mk b{ font-size:12px; font-weight:700; color: var(--ink); }
+.mk.on{ border-color: var(--c-500); background: var(--c-100); }
+.mk .tick{ position:absolute; right:4px; top:4px; width:18px; height:18px; border-radius:50%; background: var(--c-500); color:#fff; display:none; place-items:center; }
+.mk.on .tick{ display:grid; }
+.mk .tick .icon{ font-size:14px; }
+.mk-count{ font-size:14px; font-weight:700; color: var(--c-700); }
+.line-tag{ display:inline-flex; align-items:center; height:22px; padding:0 8px; border-radius:11px; font-size:11.5px; font-weight:700; background: var(--c-100); color: var(--c-700); }
+.btn-row{ display:flex; flex-wrap:wrap; gap:8px; }
+.btn-soft{ background: var(--c-100); color: var(--c-700); }
+.empty-mk{ text-align:center; padding:22px 8px; color: var(--ink-secondary); }
+.empty-mk .emo{ font-size:34px; display:block; margin-bottom:8px; }
+
+/* print guide sheet */
+.guide ol{ margin:10px 0 4px 20px; padding:0; color: var(--ink-body); line-height:1.55; }
+.guide ol b{ color: var(--ink); }
+
+/* ---------- PRINT PAGES (millimeters, exact in print) ---------- */
+#print{ display:none; }
+.pg{ position:relative; background:#fff; color:#222; font-family: Inter, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; overflow:hidden; }
+.pg .hd{ position:absolute; left:0; right:0; top:0; display:flex; justify-content:space-between; align-items:baseline; border-bottom:.35mm solid #6C4BD8; padding-bottom:1.4mm; }
+.pg .hd b{ font-size:12pt; color:#42307E; font-weight:800; letter-spacing:-.01em; }
+.pg .hd span{ font-size:7.5pt; color:#777; }
+.pg .ft{ position:absolute; left:0; right:0; bottom:0; display:flex; justify-content:space-between; font-size:6.5pt; color:#6E6E6E; }
+.pg .cell{ position:absolute; border:.2mm solid #cfcfcf; border-radius:1.2mm; box-sizing:border-box; display:flex; flex-direction:column; align-items:stretch; padding:.8mm; gap:.5mm; text-align:center; }
+.pg .sw{ border:.2mm solid #b9b9b9; border-radius:.9mm; flex-shrink:0; }
+.pg .bl{ border:.2mm dashed #b9b9b9; border-radius:.9mm; flex-shrink:0; }
+.pg .cell b{ display:block; font-weight:800; color:#222; line-height:1.05; white-space:nowrap; }
+.pg .cell i{ display:block; font-style:italic; color:#888; line-height:1.05; white-space:nowrap; }
+.pg .cell em{ display:block; font-style:normal; color:#555; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pg .fh{ position:absolute; display:flex; align-items:flex-end; gap:1.5mm; font-weight:800; color:#42307E; border-bottom:.2mm solid #e3ddf3; }
+.pg .fh i{ display:block; width:3mm; height:3mm; border-radius:50%; }
+.pg .card{ position:absolute; border:.25mm dashed #bbb; box-sizing:border-box; border-radius:2.5mm; padding:2.5mm; }
+.pg .card .ch{ display:flex; justify-content:space-between; align-items:baseline; font-weight:800; color:#42307E; font-size:9pt; margin-bottom:1.5mm; }
+.pg .card .ch span{ font-size:6.5pt; color:#999; font-weight:600; }
+@media print{
+  html, body{ background:#fff !important; }
+  body > *:not(#print){ display:none !important; }
+  #print{ display:block !important; }
+  .pg{ page-break-after: always; break-after: page; }
+  .pg:last-child{ page-break-after:auto; break-after:auto; }
+}
+
+</style>
+<style id="playful">
+/* ============================================================
+   PERSONALITY: Playful (lifted from the skill's playful.html), Ultimate
+   violet palette. Illustrated banner hero with a bobbing emoji mascot,
+   wave edge and overlapping mini stat cards on every main view; pastel
+   tiles; emoji choice cards; chunky "ledge" buttons that press down;
+   labeled tab bar with a raised, tilted center Print button; party
+   celebration (emoji confetti) when a chart goes to print; bouncy springs.
+   Swap: the paper preview gets its own "peek" card instead of a journey path.
+   ============================================================ */
+:root{
+  --bg:#FAF7FF; --line:#ECE6F8; --ledge:#E6DFF5; --ink-3:#8E87A1;
+  --bounce: cubic-bezier(.34,1.56,.64,1); --ease-out: cubic-bezier(.16,1,.3,1);
+  --grad: linear-gradient(135deg, #FF9A5C 0%, #EE4F86 38%, #7A4FE0 72%, #3D8BE6 100%);
+  --grad-btn: linear-gradient(135deg, #8A63F0, #6C4BD8 60%, #5A3BC4);
+  --grad-ledge: #4A2FA8;
+  --y-bg:#FFF1C9; --y:#946400; --b-bg:#DDEBFF; --b:#2459C4; --p-bg:#EDE4FF; --p:#6236D6; --g-bg:#D8F6E5; --g:#0F7A44; --k-bg:#FFE3EC; --k:#C02A5C;
+  --font-display: 'Inter Display', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+:root[data-theme="dark"]{
+  --bg:#15121C; --line:#2F2940; --ledge:#0C0A12; --ink-3:#8E86A2;
+  --grad-btn: linear-gradient(135deg, #A68CF5, #9A82F0 60%, #8A6FE8); --grad-ledge:#4C3A96;
+  --y-bg:rgba(255,196,107,.14); --y:#FFCB7A; --b-bg:rgba(110,160,255,.15); --b:#93B8FF; --p-bg:rgba(160,120,255,.17); --p:#C4A9FF; --g-bg:rgba(60,200,120,.14); --g:#79DDA6; --k-bg:rgba(255,110,150,.15); --k:#FF9DBA;
+}
+body{ background: var(--bg); color: var(--ink-body); }
+.main{ padding-top: calc(18px + env(safe-area-inset-top)); }
+@media (min-width:900px){ .main{ max-width:520px; } }
+
+/* bouncy pop-in entrance */
+.rise{ animation: p-rise .75s var(--bounce) both; animation-delay: calc(var(--i,0) * 80ms + 60ms); }
+@keyframes p-rise{ from{ opacity:0; transform: translateY(24px) scale(.94); } }
+.view.settled .rise{ animation:none; }
+.emo{ font-family: "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif; line-height:1; font-style:normal; }
+
+/* ---------- top greeting row ---------- */
+.top{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:16px; }
+.hi{ display:flex; align-items:center; gap:10px; min-width:0; }
+.hi > div{ min-width:0; }
+.wave{ font-size:30px; display:inline-block; transform-origin:70% 70%; animation: p-wave 2.4s ease-in-out .8s 2; flex-shrink:0; }
+@keyframes p-wave{ 10%,30%{ transform: rotate(16deg); } 20%{ transform: rotate(-8deg); } 40%,100%{ transform: rotate(0); } }
+.top .date{ font-size:13px; font-weight:600; color: var(--ink-3); }
+.top h1{ font-family: var(--font-display); font-size:26px; font-weight:800; letter-spacing:-.03em; line-height:1.1; color: var(--ink); margin:0; }
+.streak{ display:inline-flex; align-items:center; justify-content:center; gap:6px; height:44px; padding:0 14px; border-radius:22px; background: var(--surface); box-shadow: 0 3px 0 var(--ledge); font-weight:800; color: var(--ink); white-space:nowrap; flex-shrink:0; }
+.streak .emo{ font-size:18px; }
+
+/* ---------- HERO: illustrated banner ---------- */
+.hero{ position:relative; overflow:hidden; border-radius:30px; padding:20px 20px 74px; margin:0; color:#fff; background: var(--grad); }
+.hero .sun{ position:absolute; right:-40px; top:-40px; width:200px; height:200px; border-radius:50%; background: radial-gradient(circle, rgba(255,255,255,.35), rgba(255,255,255,0) 65%); pointer-events:none; }
+.mascot{ position:absolute; right:18px; top:22px; font-size:66px; filter: drop-shadow(0 10px 12px rgba(60,20,120,.28)); animation: p-bob 3s ease-in-out infinite; pointer-events:none; }
+@keyframes p-bob{ 50%{ transform: translateY(-8px) rotate(-4deg); } }
+.hero .htag{ position:relative; display:inline-flex; align-items:center; gap:6px; height:30px; max-width: calc(100% - 84px); padding:0 12px; border-radius:15px; background: rgba(255,255,255,.25); font-size:13px; font-weight:700; color:#fff; }
+.hero .htag > span:last-child{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.big-row{ position:relative; display:flex; align-items:baseline; gap:8px; margin-top:8px; padding-right:70px; }
+.big{ font-family: var(--font-display); font-size:80px; font-weight:800; letter-spacing:-.05em; line-height:.95; text-shadow: 0 4px 0 rgba(70,30,140,.22); font-variant-numeric: tabular-nums; }
+.big.roll{ line-height:1.1; height:1.1em; }
+.big.roll .roll-col > span, .big.roll > span{ display:block; height:1.1em; line-height:1.1; }
+.big-unit{ font-size:17px; font-weight:700; opacity:.95; max-width:9ch; line-height:1.15; }
+.go{ position:relative; z-index:2; margin-top:14px; display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:46px; padding:0 20px; border-radius:23px; background:#fff; color:#5A36C2; font-weight:800; font-size:15.5px; box-shadow: 0 4px 0 rgba(70,30,140,.28); transition: transform .15s, box-shadow .15s; }
+.go:active{ transform: translateY(3px); box-shadow: 0 1px 0 rgba(70,30,140,.28); }
+.go .emo{ font-size:17px; }
+.hero svg.waves{ position:absolute; left:0; right:0; bottom:-1px; width:100%; height:64px; pointer-events:none; }
+:root[data-theme="dark"] .hero{ filter: saturate(.9) brightness(.92); }
+:root[data-theme="dark"] .go{ color:#4A2FA8; }
+
+/* mini stat cards overlapping the banner */
+.minis{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:8px; margin-top:-46px; position:relative; z-index:3; padding:0 10px; margin-bottom:2px; }
+.mini{ border-radius:20px; padding:10px 6px; text-align:center; background: var(--surface); box-shadow: 0 3px 0 var(--ledge); min-width:0; }
+.mini .emo{ font-size:20px; display:block; }
+.mini b{ display:block; font-size:19px; font-weight:800; letter-spacing:-.02em; margin-top:4px; color: var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-variant-numeric: tabular-nums; }
+.mini span:not(.emo){ display:block; font-size:11px; font-weight:600; color: var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* ---------- cards ---------- */
+.panel, .card{ background: var(--surface); border:none; border-radius:26px; padding:18px; margin:14px 0 0; box-shadow: 0 3px 0 var(--ledge); }
+.panel-head, .card-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
+.panel-title, .card-head h2{ font-family: var(--font-display); font-size:19px; font-weight:800; letter-spacing:-.02em; color: var(--ink); margin:0; line-height:1.2; }
+.ptitle{ display:flex; align-items:center; gap:8px; min-width:0; }
+.ptitle .emo{ font-size:19px; }
+.step{ display:inline-grid; place-items:center; width:30px; height:30px; border-radius:11px; background: var(--grad-btn); color:#fff; font-size:14px; font-weight:800; margin:0; flex-shrink:0; box-shadow: 0 3px 0 var(--grad-ledge); transform: rotate(-6deg); }
+.pill-soft{ display:inline-flex; align-items:center; height:28px; padding:0 10px; border-radius:12px; font-size:13px; font-weight:700; background: var(--p-bg); color: var(--p); white-space:nowrap; flex-shrink:0; }
+.sub-note{ font-size:13.5px; color: var(--ink-secondary); margin:0 0 12px; }
+
+/* page peek */
+.peek{ position:relative; border-radius:22px; padding:16px 12px 12px; background: var(--p-bg); }
+.peek .paper-wrap{ margin:0; display:flex; justify-content:center; }
+.paper{ position:relative; background:#fff; border-radius:6px; box-shadow: 0 3px 0 rgba(98,54,214,.14), 0 10px 26px rgba(60,40,130,.16); overflow:hidden; transform: rotate(-1.2deg); }
+.paper .page-scale{ transform-origin: 0 0; position:absolute; left:0; top:0; }
+.pager{ display:flex; align-items:center; justify-content:center; gap:10px; margin-top:12px; }
+.pager button{ width:44px; height:44px; border-radius:15px; background: var(--surface); color: var(--p); display:grid; place-items:center; box-shadow: 0 3px 0 var(--ledge); transition: transform .3s var(--bounce); }
+.pager button:active{ transform: translateY(2px); box-shadow: 0 1px 0 var(--ledge); }
+.pager button:disabled{ opacity:.4; }
+.pager span{ font-weight:800; font-size:14px; min-width:90px; text-align:center; color: var(--p); }
+
+/* chunky segmented controls */
+.seg{ display:flex; gap:6px; padding:5px; background: var(--bg); border-radius:18px; box-shadow: inset 0 2px 0 var(--line); }
+.seg button{ flex:1; min-height:46px; border-radius:14px; font-size:14.5px; font-weight:800; color: var(--ink-3); display:flex; align-items:center; justify-content:center; text-align:center; padding:0 6px; transition: background .25s, color .25s, box-shadow .25s; }
+.seg button.on{ background: var(--surface); color: var(--p); box-shadow: 0 3px 0 var(--ledge); }
+:root[data-theme="dark"] .seg button.on{ background: var(--field); }
+
+/* set tiles: pastel per group */
+.set-group{ display:flex; align-items:center; gap:6px; font-size:13px; font-weight:800; color: var(--ink-3); text-transform:none; letter-spacing:0; margin:16px 2px 8px; }
+.set-group .emo{ font-size:15px; }
+.set-grid{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px; }
+@media (max-width:359px){ .set-grid{ grid-template-columns: 1fr; } }
+.setbtn{ position:relative; display:flex; align-items:center; gap:10px; min-height:60px; padding:10px 12px; border-radius:20px; background: var(--tb, var(--p-bg)); color: var(--tf, var(--p)); border:2.5px solid transparent; text-align:left; min-width:0; box-shadow: 0 3px 0 var(--ledge); transition: transform .3s var(--bounce), border-color .2s, box-shadow .2s; }
+.setbtn:active{ transform: scale(.95) rotate(-1deg); }
+.setbtn .dots{ display:grid; grid-template-columns: repeat(3, 9px); gap:2px; padding:5px; border-radius:12px; background:#fff; flex-shrink:0; box-shadow: 0 2px 0 rgba(0,0,0,.06); }
+:root[data-theme="dark"] .setbtn .dots{ background:#2B2538; }
+.setbtn .dots i{ width:9px; height:9px; border-radius:3px; display:block; }
+.setbtn .t{ min-width:0; flex:1; }
+.setbtn .t b{ display:block; font-size:15px; font-weight:800; color: inherit; line-height:1.15; letter-spacing:-.01em; }
+.setbtn .t span{ display:block; font-size:12px; font-weight:600; color: var(--ink-secondary); }
+.setbtn.on{ border-color: currentColor; transform: translateY(-1px); }
+.setbtn .tick{ position:absolute; right:-6px; top:-6px; width:24px; height:24px; border-radius:50%; background:#2BC46F; color:#fff; display:none; place-items:center; box-shadow: 0 2px 0 #1E9E57; }
+.setbtn.on .tick{ display:grid; animation: p-pop .5s var(--bounce); }
+.setbtn .tick .icon{ font-size:16px; }
+@keyframes p-pop{ from{ transform: scale(0) rotate(-30deg); } }
+.g-0{ --tb: var(--p-bg); --tf: var(--p); } .g-1{ --tb: var(--b-bg); --tf: var(--b); } .g-2{ --tb: var(--k-bg); --tf: var(--k); } .g-3{ --tb: var(--g-bg); --tf: var(--g); } .g-4{ --tb: var(--y-bg); --tf: var(--y); }
+
+.mine-row{ display:flex; align-items:center; gap:12px; margin-top:14px; padding:12px 14px; border-radius:20px; background: var(--y-bg); border:2.5px solid transparent; width:100%; text-align:left; box-shadow: 0 3px 0 var(--ledge); color: var(--y); transition: transform .3s var(--bounce); }
+.mine-row:active{ transform: scale(.97); }
+.mine-row.on{ border-color: currentColor; }
+.mine-row .emo{ font-size:24px; width:44px; height:44px; border-radius:15px; background: var(--surface); display:grid; place-items:center; flex-shrink:0; box-shadow: 0 3px 0 rgba(0,0,0,.06); }
+.mine-row .t{ flex:1; min-width:0; }
+.mine-row .t b{ display:block; font-size:15px; font-weight:800; color: inherit; }
+.mine-row .t span{ display:block; font-size:12.5px; font-weight:600; color: var(--ink-secondary); }
+
+/* layout choice cards */
+.choices{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:8px; }
+.choice{ display:flex; flex-direction:column; align-items:center; gap:6px; padding:12px 4px 10px; border-radius:18px; background: var(--surface); border:2.5px solid var(--line); box-shadow: 0 3px 0 var(--line); text-align:center; min-width:0; color: var(--ink-secondary); transition: all .3s var(--bounce); }
+.choice .mini-page{ width:46px; height:60px; background:#fff; border-radius:4px; box-shadow: 0 2px 0 rgba(0,0,0,.08), 0 1px 3px rgba(0,0,0,.12); padding:4px; display:grid; gap:2px; align-content:start; transition: transform .4s var(--bounce); }
+.choice .mini-page i{ display:block; border-radius:1.5px; }
+.choice b{ font-size:13.5px; font-weight:800; color: var(--ink); line-height:1.2; }
+.choice span:not(.mini-page){ font-size:11.5px; line-height:1.25; }
+.choice.on{ border-color: var(--c-500); background: var(--p-bg); box-shadow: 0 3px 0 var(--c-300); }
+.choice.on b{ color: var(--p); }
+.choice.on .mini-page{ transform: scale(1.1) rotate(-6deg); }
+
+/* switches + fields */
+.opt{ display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:56px; padding:8px 0; border-top:2px dashed var(--line); }
+.opt:first-child{ border-top:none; }
+.opt .t{ min-width:0; flex:1; }
+.opt .t b{ display:block; font-size:15px; color: var(--ink); font-weight:700; }
+.opt .t span{ display:block; font-size:12.5px; color: var(--ink-secondary); }
+.switch{ position:relative; display:block; width:54px; height:32px; border-radius:16px; background: var(--line); flex-shrink:0; transition: background .25s; box-shadow: inset 0 2px 0 rgba(0,0,0,.07); }
+.switch::before{ content:none !important; display:none !important; }
+.switch::after{ content:''; position:absolute; left:3px; top:3px; width:26px; height:26px; border-radius:50%; background:#fff; box-shadow: 0 2px 0 rgba(40,25,80,.14); transition: transform .4s var(--bounce); }
+.switch.on{ background: var(--c-500); box-shadow: inset 0 2px 0 rgba(0,0,0,.12); }
+.switch.on::after{ transform: translateX(22px); }
+:root[data-theme="dark"] .switch{ background:#3A3350; }
+:root[data-theme="dark"] .switch.on{ background: var(--c-500); }
+.switch-hit{ display:flex; align-items:center; justify-content:flex-end; min-width:60px; min-height:44px; }
+.field-row{ display:flex; flex-direction:column; gap:8px; margin-top:14px; }
+.field-row label{ font-size:14px; font-weight:700; color: var(--ink-secondary); }
+.field-row input, .mk-tools input{ width:100%; min-height:52px; border-radius:16px; border:2.5px solid var(--line); background: var(--field); padding:0 14px; font-size:16px; font-weight:600; color: var(--ink); outline:none; transition: border-color .2s; }
+.field-row input:focus, .mk-tools input:focus{ border-color: var(--c-500); }
+
+/* buttons: chunky with a ledge */
+.btn{ border-radius:18px; font-weight:800; transition: transform .15s, box-shadow .15s, background .2s; }
+.btn-primary{ background: var(--grad-btn); color:#fff; box-shadow: 0 4px 0 var(--grad-ledge); border:none; }
+.btn-primary:hover{ background: var(--grad-btn); filter: brightness(1.05); }
+.btn-primary:active{ transform: translateY(3px); box-shadow: 0 1px 0 var(--grad-ledge); }
+:root[data-theme="dark"] .btn-primary{ color:#15121C; }
+.btn-secondary{ background: var(--surface); border:2.5px solid var(--line); color: var(--ink); box-shadow: 0 3px 0 var(--line); }
+.btn-secondary:active, .btn-soft:active, .btn-ghost-danger:active{ transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
+.btn-soft{ background: var(--p-bg); color: var(--p); border:2.5px solid transparent; box-shadow: 0 3px 0 var(--ledge); }
+.btn-ghost-danger{ border:2.5px solid #F2CFC6; box-shadow: 0 3px 0 #F2CFC6; }
+:root[data-theme="dark"] .btn-ghost-danger{ background: var(--surface); border-color: rgba(238,154,136,.35); box-shadow: 0 3px 0 rgba(238,154,136,.2); color:#F2B2A3; }
+.btn-big{ width:100%; min-height:58px; font-size:17px; border-radius:20px; }
+
+/* ---------- my markers ---------- */
+.mk-tools{ display:flex; gap:8px; align-items:center; margin-bottom:12px; }
+.fam-row{ display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; margin: 0 -18px 12px; padding: 2px 18px 5px; }
+.fam-row::-webkit-scrollbar{ display:none; }
+.fam{ flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:44px; min-width:48px; padding:0 14px; border-radius:16px; background: var(--bg); font-size:13.5px; font-weight:800; color: var(--ink-secondary); box-shadow: 0 3px 0 var(--line); transition: all .3s var(--bounce); }
+.fam i{ width:13px; height:13px; border-radius:5px; display:block; }
+.fam.on{ background: var(--grad-btn); color:#fff; box-shadow: 0 3px 0 var(--grad-ledge); }
+:root[data-theme="dark"] .fam.on{ color:#15121C; }
+.mk-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(66px, 1fr)); gap:10px; }
+.mk{ position:relative; display:flex; flex-direction:column; align-items:center; gap:5px; padding:8px 2px 7px; border-radius:18px; background: var(--bg); min-height:80px; border:2.5px solid transparent; box-shadow: 0 3px 0 var(--line); transition: transform .35s var(--bounce), border-color .2s, background .2s; }
+.mk:active{ transform: scale(.92) rotate(-2deg); }
+.mk .dot{ width:38px; height:38px; border-radius:14px; box-shadow: inset 0 0 0 1.5px rgba(0,0,0,.08), 0 2px 0 rgba(0,0,0,.08); display:block; transition: transform .4s var(--bounce); }
+.mk b{ font-size:12px; font-weight:800; color: var(--ink); }
+.mk.on{ border-color: var(--c-500); background: var(--p-bg); box-shadow: 0 3px 0 var(--c-300); }
+.mk.on .dot{ transform: rotate(-8deg) scale(1.06); }
+.mk .tick{ position:absolute; right:-5px; top:-5px; width:22px; height:22px; border-radius:50%; background:#2BC46F; color:#fff; display:none; place-items:center; box-shadow: 0 2px 0 #1E9E57; }
+.mk.on .tick{ display:grid; animation: p-pop .45s var(--bounce); }
+.mk .tick .icon{ font-size:15px; }
+.mk-count{ font-size:14px; font-weight:800; color: var(--p); }
+.btn-row{ display:flex; flex-direction:row; flex-wrap:wrap; gap:10px; }
+.btn-row .btn{ flex:1 1 100%; }
+.empty-mk{ text-align:center; padding:22px 8px; color: var(--ink-secondary); font-weight:600; }
+.empty-mk .emo{ font-size:40px; display:block; margin-bottom:8px; animation: p-bob 2s ease-in-out infinite; }
+
+/* ---------- tips ---------- */
+.tip{ display:flex; align-items:flex-start; gap:12px; padding:12px 0; border-top:2px dashed var(--line); }
+.tip:first-of-type{ border-top:none; padding-top:2px; }
+.tip .emo{ width:44px; height:44px; border-radius:15px; background: var(--tb, var(--p-bg)); display:grid; place-items:center; font-size:22px; flex-shrink:0; box-shadow: 0 3px 0 var(--ledge); }
+.tip .t{ min-width:0; flex:1; }
+.tip .t b{ display:block; font-size:15px; font-weight:800; color: var(--ink); line-height:1.3; }
+.tip .t span{ display:block; font-size:13.5px; color: var(--ink-secondary); line-height:1.45; margin-top:2px; }
+
+/* ---------- settings ---------- */
+.settings-group{ margin-bottom:0; }
+.settings-row{ border-bottom:2px dashed var(--line); }
+.theme-seg{ border:none; border-radius:18px; padding:5px; gap:6px; box-shadow: inset 0 2px 0 var(--line); }
+.theme-seg button{ border-radius:14px; font-size:14px; font-weight:800; color: var(--ink-3); min-height:46px; transition: all .35s var(--bounce); }
+.theme-seg button.active{ background: var(--surface); color: var(--p); box-shadow: 0 3px 0 var(--ledge); }
+:root[data-theme="dark"] .theme-seg button.active{ background: var(--field); }
+.helper{ text-align:center; margin-top:16px; }
+.helper .emo{ margin-right:4px; }
+
+/* ---------- NAV: labeled white bar with a raised, tilted center Print ---------- */
+.bottom-nav{ display:grid; grid-template-columns: 1fr 1fr 74px 1fr 1fr; align-items:center; justify-content:initial; gap:0; left:12px; right:12px; max-width:406px; margin:0 auto; padding:6px; border:none; border-radius:28px; background: var(--surface); -webkit-backdrop-filter:none; backdrop-filter:none; box-shadow: 0 4px 0 var(--ledge), 0 12px 30px rgba(40,25,80,.12); }
+.bottom-nav .nav-pill{ display:none; }
+.bottom-nav button[data-view]{ background:transparent !important; color: var(--ink-3); min-height:52px; border-radius:20px; font-size:11px; font-weight:800; padding:4px 0; transition: color .3s; }
+.bottom-nav button[data-view] .icon{ font-size:23px; transition: transform .4s var(--bounce); }
+.bottom-nav button[data-view].active{ color: var(--c-500); }
+.bottom-nav button[data-view].active .icon{ transform: translateY(-2px) scale(1.12); }
+.bottom-nav button[data-view]:active{ transform: scale(.9); }
+.bottom-nav .add{ justify-self:center; width:62px; height:62px; margin-top:-30px; border-radius:22px; background: var(--grad); color:#fff; display:grid; place-items:center; box-shadow: 0 5px 0 var(--grad-ledge), 0 12px 24px rgba(108,75,216,.35); transform: rotate(-6deg); transition: transform .3s var(--bounce), box-shadow .15s; }
+.bottom-nav .add .icon{ font-size:30px; }
+.bottom-nav .add:active{ transform: rotate(0) translateY(4px); box-shadow: 0 1px 0 var(--grad-ledge); }
+:root[data-theme="dark"] .bottom-nav{ box-shadow: 0 4px 0 var(--ledge), 0 12px 30px rgba(0,0,0,.4); }
+#toast-container{ bottom: calc(120px + env(safe-area-inset-bottom)); }
+
+/* ---------- sheets ---------- */
+.overlay .sheet{ border-radius:32px 32px 0 0; padding-top:10px; }
+.overlay .sheet::before{ content:''; display:block; width:44px; height:6px; border-radius:3px; background: var(--line); margin:0 auto 14px; }
+.sheet h3{ font-family: var(--font-display); font-size:23px; font-weight:800; letter-spacing:-.025em; color: var(--ink); }
+.print-party{ text-align:center; }
+.print-party .trophy{ font-size:84px; display:inline-block; animation: p-trophy 1s var(--bounce) .15s both, p-bob 2.4s ease-in-out 1.3s infinite; }
+@keyframes p-trophy{ 0%{ transform: scale(0) rotate(-30deg); } 100%{ transform: scale(1) rotate(0); } }
+.print-party .bignum{ font-family: var(--font-display); font-size:60px; font-weight:800; letter-spacing:-.05em; line-height:1; margin-top:4px; background: var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+
+/* party confetti (emoji + paper bits) */
+.p-confetti{ position:fixed; z-index:600; pointer-events:none; left:0; top:0; font-size:20px; will-change: transform, opacity; animation: p-fall var(--t,1.6s) var(--ease-out) forwards; }
+@keyframes p-fall{ 0%{ transform: translate(var(--x0), var(--y0)) rotate(0) scale(.6); opacity:1; } 100%{ transform: translate(var(--x1), var(--y1)) rotate(var(--r)) scale(1); opacity:0; } }
+.p-spark{ position:absolute; left:50%; top:50%; font-size:14px; pointer-events:none; z-index:5; animation: p-spark .8s var(--ease-out) forwards; }
+@keyframes p-spark{ from{ transform: translate(-50%,-50%) scale(.4); opacity:1; } to{ transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1); opacity:0; } }
+@media (prefers-reduced-motion: reduce){ .mascot, .wave, .empty-mk .emo, .print-party .trophy{ animation:none !important; } }
+@media print{ .p-confetti{ display:none !important; } }
+</style>
+
+<style id="page-size">@page{ size: letter portrait; margin: 8mm; }</style>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Swatch Chart">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script>
+if('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')){
+  window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+}
+</script>
+</head>
+<body data-motion="playful">
+
+<div class="app">
+
+  <!-- ============ DESKTOP SIDEBAR ============ -->
+  <aside class="sidebar">
+    <ul class="nav-list" id="nav-list"></ul>
+    <div class="sidebar-footer">Saved privately on this device</div>
+  </aside>
+
+
+  <main class="main">
+
+    <!-- ---------- CHART: pick markers, layout, details, print ---------- -->
+    <section class="view active" id="view-chart">
+      <header class="top rise" style="--i:0">
+        <div class="hi"><span class="wave emo">👋</span><div><div class="date">Swatch Chart Maker</div><h1>Make a chart</h1></div></div>
+        <button class="streak tap" data-goto="markers" aria-label="My markers"><span class="emo">🖍️</span><span id="own-chip">0</span></button>
+      </header>
+      <section class="hero rise" style="--i:1" aria-label="Your chart">
+        <div class="sun"></div>
+        <div class="mascot emo" aria-hidden="true">🎨</div>
+        <span class="htag"><span class="emo">📄</span><span id="hero-title">Honolulu 320</span></span>
+        <div class="big-row"><span class="big" id="hero-big">0</span><span class="big-unit" id="hero-unit">swatches ready to print</span></div>
+        <button class="go" data-action="print">Print it <span class="emo">👉</span></button>
+        <svg class="waves" viewBox="0 0 400 64" preserveAspectRatio="none" aria-hidden="true"><path d="M0 34 C 70 8, 140 8, 200 30 S 330 58, 400 26 V64 H0Z" fill="rgba(255,255,255,.25)"/><path d="M0 46 C 80 24, 150 30, 210 44 S 340 62, 400 40 V64 H0Z" fill="var(--bg)"/></svg>
+      </section>
+      <div class="minis rise" style="--i:2">
+        <div class="mini"><span class="emo">📄</span><b id="mini-pages">1</b><span id="mini-pages-l">pages</span></div>
+        <div class="mini"><span class="emo">🌈</span><b id="mini-fams">0</b><span>color families</span></div>
+        <div class="mini"><span class="emo">📏</span><b id="mini-paper">Letter</b><span>paper</span></div>
+      </div>
+
+      <section class="card rise" style="--i:3" aria-label="Preview">
+        <div class="card-head"><h2 class="ptitle">Sneak peek <span class="emo">👀</span></h2><span class="pill-soft" id="hero-sub">1 page</span></div>
+        <div class="peek">
+          <div class="paper-wrap"><div class="paper" id="paper" style="background:#fff"><div class="page-scale" id="page-scale"></div></div></div>
+          <div class="pager" id="pager"><button data-action="page-prev" aria-label="Previous page"><span class="icon">chevron_left</span></button><span id="page-label">Page 1 of 1</span><button data-action="page-next" aria-label="Next page"><span class="icon">chevron_right</span></button></div>
+        </div>
+      </section>
+
+      <div class="panel rise" style="--i:4">
+        <div class="panel-head"><p class="panel-title ptitle"><span class="step">1</span>Which markers? <span class="emo">🖍️</span></p></div>
+        <div class="seg" id="line-seg" role="tablist" aria-label="Marker line"><button data-action="line-tab" data-line="h">Honolulu</button><button data-action="line-tab" data-line="oa">Oahu</button></div>
+        <div id="set-list"></div>
+        <button class="mine-row" data-action="use-mine" id="mine-row"><span class="emo">💜</span><span class="t"><b>Just the markers I own</b><span id="mine-sub">Pick them in My markers</span></span><span class="icon">chevron_right</span></button>
+      </div>
+
+      <div class="panel rise" style="--i:5">
+        <div class="panel-head"><p class="panel-title ptitle"><span class="step">2</span>Pick a layout <span class="emo">✂️</span></p></div>
+        <div class="choices" id="layout-choices"></div>
+      </div>
+
+      <div class="panel rise" style="--i:6">
+        <div class="panel-head"><p class="panel-title ptitle"><span class="step">3</span>Little details <span class="emo">✨</span></p></div>
+        <div class="seg" id="order-seg" aria-label="Order"><button data-action="order" data-v="color">Light to dark</button><button data-action="order" data-v="code">Code order</button></div>
+        <div style="margin-top:8px" id="opts"></div>
+        <div class="field-row"><label for="chart-title">Title on the page</label><input id="chart-title" maxlength="40" placeholder="Honolulu 320" autocomplete="off"></div>
+        <div class="field-row"><label>Paper</label><div class="seg" id="paper-seg"><button data-action="paper" data-v="Letter">US Letter</button><button data-action="paper" data-v="A4">A4</button></div></div>
+      </div>
+      <div class="rise" style="--i:7;margin-top:18px"><button class="btn btn-primary btn-big" data-action="print"><span class="icon">print</span>Print my chart</button></div>
+    </section>
+
+    <!-- ---------- MY MARKERS ---------- -->
+    <section class="view" id="view-markers">
+      <header class="top rise" style="--i:0">
+        <div class="hi"><span class="wave emo">🖍️</span><div><div class="date">Tick what you own</div><h1>My markers</h1></div></div>
+      </header>
+      <section class="hero rise" style="--i:1" aria-label="Markers ticked">
+        <div class="sun"></div>
+        <div class="mascot emo" aria-hidden="true">🖌️</div>
+        <span class="htag"><span class="emo">💜</span><span>Your collection</span></span>
+        <div class="big-row"><span class="big" id="mk-big">0</span><span class="big-unit">markers ticked</span></div>
+        <button class="go" data-action="chart-mine">Make my chart <span class="emo">👉</span></button>
+        <svg class="waves" viewBox="0 0 400 64" preserveAspectRatio="none" aria-hidden="true"><path d="M0 34 C 70 8, 140 8, 200 30 S 330 58, 400 26 V64 H0Z" fill="rgba(255,255,255,.25)"/><path d="M0 46 C 80 24, 150 30, 210 44 S 340 62, 400 40 V64 H0Z" fill="var(--bg)"/></svg>
+      </section>
+      <div class="minis rise" style="--i:2">
+        <div class="mini"><span class="emo">🌺</span><b id="mk-mini-h">0</b><span>Honolulu</span></div>
+        <div class="mini"><span class="emo">🌊</span><b id="mk-mini-oa">0</b><span>Oahu</span></div>
+        <div class="mini"><span class="emo">🌈</span><b id="mk-mini-fam">0</b><span>families</span></div>
+      </div>
+      <div class="panel rise" style="--i:3">
+        <div class="panel-head"><p class="panel-title ptitle">Quick start <span class="emo">⚡</span></p><span class="mk-count" id="mk-count">0</span></div>
+        <div class="seg" id="mk-line-seg"><button data-action="mk-line" data-line="h">Honolulu</button><button data-action="mk-line" data-line="oa">Oahu</button></div>
+        <p class="sub-note" style="margin-top:12px">Add a whole set in one tap, then untick what you're missing.</p>
+        <div class="btn-row"><button class="btn btn-soft btn-sm" data-action="add-set-sheet"><span class="icon">library_add</span>Add a set</button><button class="btn btn-secondary btn-sm" data-action="import-ultimate"><span class="icon">upload_file</span>From my Ultimate backup</button></div>
+        <input type="file" id="ultimate-file" accept="application/json,.json" class="hidden">
+      </div>
+      <div class="panel rise" style="--i:4">
+        <div class="mk-tools"><input id="mk-search" type="search" placeholder="Search a code or name" autocomplete="off" aria-label="Search markers"></div>
+        <div class="fam-row" id="fam-row"></div>
+        <div class="mk-grid" id="mk-grid"></div>
+      </div>
+      <div class="rise" style="--i:5;margin-top:18px"><button class="btn btn-primary btn-big" data-action="chart-mine"><span class="icon">grid_view</span>Make my chart</button></div>
+    </section>
+
+    <!-- ---------- TIPS ---------- -->
+    <section class="view" id="view-tips">
+      <header class="top rise" style="--i:0">
+        <div class="hi"><span class="wave emo">💡</span><div><div class="date">For a perfect chart</div><h1>Swatch tips</h1></div></div>
+      </header>
+      <section class="card rise" style="--i:1">
+        <div class="card-head"><h2 class="ptitle">Printing <span class="emo">🖨️</span></h2></div>
+        <div class="tip"><span class="emo" style="--tb:var(--p-bg)">💯</span><div class="t"><b>Keep Scale at 100%</b><span>In the print screen, turn off "Fit to page" so every box prints at its real size.</span></div></div>
+        <div class="tip"><span class="emo" style="--tb:var(--b-bg)">📃</span><div class="t"><b>Use thick, smooth paper</b><span>Marker paper or 200gsm+ cardstock stops alcohol ink bleeding into the next box.</span></div></div>
+        <div class="tip"><span class="emo" style="--tb:var(--g-bg)">💾</span><div class="t"><b>No printer nearby?</b><span>Pick "Save as PDF" in the print screen and print it later at a copy shop.</span></div></div>
+      </section>
+      <section class="card rise" style="--i:2">
+        <div class="card-head"><h2 class="ptitle">Swatching <span class="emo">🖍️</span></h2></div>
+        <div class="tip"><span class="emo" style="--tb:var(--y-bg)">🌗</span><div class="t"><b>Swatch both nibs</b><span>Fill the box with the brush tip, then add a stripe with the chisel so you see both.</span></div></div>
+        <div class="tip"><span class="emo" style="--tb:var(--k-bg)">🎨</span><div class="t"><b>Layer for depth</b><span>Two coats show the darkest value. Big boxes have a dashed blend test box for that.</span></div></div>
+        <div class="tip"><span class="emo" style="--tb:var(--p-bg)">✏️</span><div class="t"><b>Blank or pre-filled</b><span>Screens can't show ink exactly, so print blank to swatch your real markers for the truest chart.</span></div></div>
+        <div class="tip"><span class="emo" style="--tb:var(--b-bg)">✂️</span><div class="t"><b>Cards for the desk</b><span>The Cards layout cuts into one card per color family, easy to keep beside each marker case.</span></div></div>
+      </section>
+      <div class="rise" style="--i:3;margin-top:18px"><button class="btn btn-primary btn-big" data-goto="chart"><span class="icon">grid_view</span>Back to my chart</button></div>
+    </section>
+
+    <!-- ---------- SETTINGS (keep in every planner) ---------- -->
+    <section class="view" id="view-settings">
+      <header class="top rise" style="--i:0"><div class="hi"><span class="wave emo">⚙️</span><div><div class="date">Your app, your way</div><h1>Settings</h1></div></div></header>
+      <div class="panel settings-group rise" style="--i:1">
+        <p class="panel-title">Appearance <span class="emo">🌙</span></p>
+        <div class="settings-row">
+          <div><div class="settings-row-title">Theme</div><div class="settings-row-desc">Auto follows your phone's light or dark setting</div></div>
+          <div class="theme-seg" role="radiogroup" aria-label="Theme">
+            <button data-theme-set="light" role="radio">Light</button><button data-theme-set="dark" role="radio">Dark</button><button data-theme-set="auto" role="radio">Auto</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel settings-group rise" style="--i:2">
+        <p class="panel-title">Your data <span class="emo">💾</span></p>
+        <div class="settings-row">
+          <div><div class="settings-row-title">Try it with sample markers</div><div class="settings-row-desc">Ticks a Honolulu 120 + 36 skin tones to play with</div></div>
+          <button id="load-sample-btn" class="btn btn-secondary btn-sm">Load sample data</button>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-title">Back up</div><div class="settings-row-desc">Download a copy of everything</div></div>
+          <button id="export-btn" class="btn btn-secondary btn-sm">Export backup</button>
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-title">Restore</div><div class="settings-row-desc">Load a backup file you exported earlier</div></div>
+          <button id="import-btn" class="btn btn-secondary btn-sm">Import backup</button>
+          <input type="file" id="import-file" accept="application/json,.json" class="hidden">
+        </div>
+        <div class="settings-row">
+          <div><div class="settings-row-title">Clear all data</div><div class="settings-row-desc">Unticks every marker and resets your chart</div></div>
+          <button id="clear-btn" class="btn btn-ghost-danger btn-sm">Clear all data</button>
+        </div>
+      </div>
+      <p class="helper"><span class="emo">🔒</span>Everything you enter stays private in this browser on this device. Nothing is uploaded anywhere.</p>
+    </section>
+
+  </main>
+
+  <!-- ============ MOBILE BOTTOM NAV (filled from NAV below) ============ -->
+  <nav class="bottom-nav" aria-label="Main" id="bottom-nav"></nav>
+
+  <div id="toast-container" aria-live="polite"></div>
+  <div id="confetti-layer"></div>
+
+  <div class="overlay hidden" id="set-sheet"><div class="sheet" role="dialog" aria-modal="true"></div></div>
+
+  <!-- Confirm modal -->
+  <div class="overlay hidden" id="modal-overlay">
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="print-party hidden" id="party-top"><span class="trophy emo">🎉</span><div class="bignum" id="party-num">0</div></div>
+      <h3 id="modal-title">Are you sure?</h3>
+      <p id="modal-message"></p>
+      <input type="text" id="modal-confirm-input" class="hidden" autocomplete="off">
+      <div class="modal-actions">
+        <button id="modal-cancel" class="btn btn-secondary">Cancel</button>
+        <button id="modal-confirm" class="btn btn-primary">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div id="print"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ============================================================
+     CONSTANTS
+     Give every planner its own STORAGE_KEY so two planners opened
+     in the same browser never overwrite each other's data.
+     ============================================================ */
+  var STORAGE_KEY = 'ohuhuSwatchChart_v1';
+  var BACKUP_PREFIX = 'ohuhu-swatch-chart';
+  // Sidebar + bottom nav are both generated from this list.
+  // Keep it to 5 items or fewer so the phone nav never crowds.
+  var NAV = [
+    { view:'chart', label:'Chart', icon:'grid_view' },
+    { view:'markers', label:'Markers', icon:'brush' },
+    { view:'tips', label:'Tips', icon:'lightbulb' },
+    { view:'settings', label:'Settings', icon:'settings' }
+  ];
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ============================================================
+     UTILITIES
+     ============================================================ */
+  var uidCounter = 0;
+  function uid(){ uidCounter++; return Date.now().toString(36) + '-' + uidCounter.toString(36) + '-' + Math.random().toString(36).slice(2,7); }
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function formatDateLocal(d){ return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); }
+  function todayStr(){ return formatDateLocal(new Date()); }
+  function parseLocalDate(s){ var p = s.split('-'); return new Date(Number(p[0]), Number(p[1])-1, Number(p[2])); }
+  function fmtShort(dateStr){ return parseLocalDate(dateStr).toLocaleDateString(undefined,{month:'short',day:'numeric'}); }
+  function escapeHtml(str){
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; });
+  }
+  function closeBtn(action, id, label){
+    return '<button class="icon-btn" data-action="' + action + '" data-id="' + id + '" aria-label="' + label + '">' + icon('close') + '</button>';
+  }
+  function checkBtn(action, id, done, label){
+    return '<button class="check-hit" data-action="' + action + '" data-id="' + id + '" aria-label="' + label + '" aria-pressed="' + (done ? 'true' : 'false') + '"><span class="checkbox' + (done ? ' checked' : '') + '"></span></button>';
+  }
+
+  /* ============================================================
+     ICONS
+     Shapes are embedded by scripts/embed_icons.py: run it after adding
+     or changing icon names and it fills the block below with only the
+     icons this file uses. Names built at runtime (e.g. 'mood_' + n)
+     must be listed in their own comment that starts with "icons:",
+     followed by the comma-separated names.
+     ============================================================ */
+  /*ICONS:START*/
+  var ICONS = {"brush":{"o":"M240-120q-45 0-89-22t-71-58q26 0 53-20.5t27-59.5q0-50 35-85t85-35q50 0 85 35t35 85q0 66-47 113t-113 47Zm0-80q33 0 56.5-23.5T320-280q0-17-11.5-28.5T280-320q-17 0-28.5 11.5T240-280q0 23-5.5 42T220-202q5 2 10 2h10Zm230-160L360-470l358-358q11-11 27.5-11.5T774-828l54 54q12 12 12 28t-12 28L470-360Zm-190 80Z","f":"M240-120q-45 0-89-22t-71-58q26 0 53-20.5t27-59.5q0-50 35-85t85-35q50 0 85 35t35 85q0 66-47 113t-113 47Zm230-240L360-470l358-358q11-11 27.5-11.5T774-828l54 54q12 12 12 28t-12 28L470-360Z"},"check":{"o":"M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z"},"chevron_left":{"o":"M560-240 320-480l240-240 56 56-184 184 184 184-56 56Z"},"chevron_right":{"o":"M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"},"close":{"o":"m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"},"grid_view":{"o":"M120-520v-320h320v320H120Zm0 400v-320h320v320H120Zm400-400v-320h320v320H520Zm0 400v-320h320v320H520ZM200-600h160v-160H200v160Zm400 0h160v-160H600v160Zm0 400h160v-160H600v160Zm-400 0h160v-160H200v160Zm400-400Zm0 240Zm-240 0Zm0-240Z","f":"M120-520v-320h320v320H120Zm0 400v-320h320v320H120Zm400-400v-320h320v320H520Zm0 400v-320h320v320H520Z"},"library_add":{"o":"M520-400h80v-120h120v-80H600v-120h-80v120H400v80h120v120ZM320-240q-33 0-56.5-23.5T240-320v-480q0-33 23.5-56.5T320-880h480q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H320Zm0-80h480v-480H320v480ZM160-80q-33 0-56.5-23.5T80-160v-560h80v560h560v80H160Zm160-720v480-480Z","f":"M520-400h80v-120h120v-80H600v-120h-80v120H400v80h120v120ZM320-240q-33 0-56.5-23.5T240-320v-480q0-33 23.5-56.5T320-880h480q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H320ZM160-80q-33 0-56.5-23.5T80-160v-560h80v560h560v80H160Z"},"lightbulb":{"o":"M480-80q-33 0-56.5-23.5T400-160h160q0 33-23.5 56.5T480-80ZM320-200v-80h320v80H320Zm10-120q-69-41-109.5-110T180-580q0-125 87.5-212.5T480-880q125 0 212.5 87.5T780-580q0 81-40.5 150T630-320H330Zm24-80h252q45-32 69.5-79T700-580q0-92-64-156t-156-64q-92 0-156 64t-64 156q0 54 24.5 101t69.5 79Zm126 0Z","f":"M480-80q-33 0-56.5-23.5T400-160h160q0 33-23.5 56.5T480-80ZM320-200v-80h320v80H320Zm10-120q-69-41-109.5-110T180-580q0-125 87.5-212.5T480-880q125 0 212.5 87.5T780-580q0 81-40.5 150T630-320H330Z"},"print":{"o":"M640-640v-120H320v120h-80v-200h480v200h-80Zm-480 80h640-640Zm560 100q17 0 28.5-11.5T760-500q0-17-11.5-28.5T720-540q-17 0-28.5 11.5T680-500q0 17 11.5 28.5T720-460Zm-80 260v-160H320v160h320Zm80 80H240v-160H80v-240q0-51 35-85.5t85-34.5h560q51 0 85.5 34.5T880-520v240H720v160Zm80-240v-160q0-17-11.5-28.5T760-560H200q-17 0-28.5 11.5T160-520v160h80v-80h480v80h80Z","f":"M720-680H240v-160h480v160Zm0 220q17 0 28.5-11.5T760-500q0-17-11.5-28.5T720-540q-17 0-28.5 11.5T680-500q0 17 11.5 28.5T720-460Zm-80 260v-160H320v160h320Zm80 80H240v-160H80v-240q0-51 35-85.5t85-34.5h560q51 0 85.5 34.5T880-520v240H720v160Z"},"settings":{"o":"m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z","f":"m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm112-260q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Z"},"upload_file":{"o":"M440-200h80v-167l64 64 56-57-160-160-160 160 57 56 63-63v167ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm280-520v-200H240v640h480v-440H520ZM240-800v200-200 640-640Z","f":"M440-200h80v-167l64 64 56-57-160-160-160 160 57 56 63-63v167ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm280-520h200L520-800v200Z"}};
+  /*ICONS:END*/
+  function svgIcon(name){
+    var d = ICONS[name]; if(!d) return '';
+    return '<svg viewBox="' + (d.v || '0 -960 960 960') + '" aria-hidden="true" focusable="false"><path class="o" d="' + d.o + '"/>' + (d.f ? '<path class="f" d="' + d.f + '"/>' : '') + '</svg>';
+  }
+  function icon(name, size){
+    return '<span class="icon' + (ICONS[name] && ICONS[name].f ? ' has-fill' : '') + '" aria-hidden="true"' + (size ? ' style="font-size:' + size + 'px"' : '') + '>' + svgIcon(name) + '</span>';
+  }
+  // Turns static <span class="icon">name</span> markup into drawings.
+  function hydrateIcons(root){
+    (root || document).querySelectorAll('span.icon').forEach(function(el){
+      if(el.querySelector('svg')) return;
+      var name = el.textContent.trim(); if(!ICONS[name]) return;
+      el.innerHTML = svgIcon(name); el.setAttribute('aria-hidden', 'true');
+      if(ICONS[name].f) el.classList.add('has-fill');
+    });
+  }
+  hydrateIcons();
+
+  /* Optical centering. Icons and text are centered by what you SEE (the
+     ink), not by their boxes. Material icons carry uneven empty space inside
+     their box (the + icon is 20% empty on each side), and a line box puts the
+     capital letters about 1px off center, so box-centered buttons look
+     lopsided. This runs after every render and nudges each button, pill, tag
+     and icon button so the visible icon + capital letters sit dead center.
+     Column buttons (icon above text) get their icon centered over the text. */
+  var OPT_SEL = '.btn, .pill, .tag, .icon-btn, .fab, .toggle, .ic-text, button, [role=button]';   // every button, not just the template's classes
+  var optCaps = {}, optCanvas = null;
+  function optCapMetrics(cs){
+    var f = cs.fontStyle + ' ' + cs.fontWeight + ' ' + cs.fontSize + ' ' + cs.fontFamily;
+    if(optCaps[f]) return optCaps[f];
+    optCanvas = optCanvas || document.createElement('canvas');
+    var c = optCanvas.getContext('2d'); c.font = f; var m = c.measureText('H');
+    if(!m.fontBoundingBoxAscent) return null;
+    return (optCaps[f] = { cap: m.actualBoundingBoxAscent, asc: m.fontBoundingBoxAscent, desc: m.fontBoundingBoxDescent });
+  }
+  function optIconInk(ic){
+    var svg = ic.querySelector('svg'); if(!svg) return null;
+    var vb = svg.viewBox && svg.viewBox.baseVal, r = svg.getBoundingClientRect(); if(!vb || !vb.width || !r.width) return null;
+    var bb = null;
+    svg.querySelectorAll('path').forEach(function(pa){
+      if(getComputedStyle(pa).display === 'none') return;
+      var b = pa.getBBox(); if(!b.width) return;
+      bb = bb ? { x: Math.min(bb.x, b.x), y: Math.min(bb.y, b.y), x2: Math.max(bb.x2, b.x + b.width), y2: Math.max(bb.y2, b.y + b.height) } : { x: b.x, y: b.y, x2: b.x + b.width, y2: b.y + b.height };
+    });
+    if(!bb) return null;
+    var k = r.width / vb.width;
+    return { l: r.left + (bb.x - vb.x) * k, r: r.left + (bb.x2 - vb.x) * k, t: r.top + (bb.y - vb.y) * k, b: r.top + (bb.y2 - vb.y) * k, svg: svg };
+  }
+  // Visible text of an element: left/right of the letters, top of the capitals to the baseline.
+  function optTextInk(el){
+    var w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, { acceptNode: function(n){ return n.textContent.trim() && !(n.parentElement && n.parentElement.closest('.icon')) ? 1 : 3; } });
+    var n, box = null, range = document.createRange();
+    while((n = w.nextNode())){
+      var cs = getComputedStyle(n.parentElement); if(cs.visibility === 'hidden') continue;
+      var m = optCapMetrics(cs); if(!m) return null;
+      range.selectNodeContents(n);
+      Array.prototype.forEach.call(range.getClientRects(), function(rc){
+        if(!rc.width) return;
+        var base = rc.top + (rc.height - (m.asc + m.desc)) / 2 + m.asc, t = base - m.cap;
+        box = box ? { l: Math.min(box.l, rc.left), r: Math.max(box.r, rc.right), t: Math.min(box.t, t), b: Math.max(box.b, base) } : { l: rc.left, r: rc.right, t: t, b: base };
+      });
+    }
+    return box;
+  }
+  function optFix(el){
+    if(el.__opt){ el.style.paddingTop = el.__opt.pt; el.style.paddingBottom = el.__opt.pb; el.style.paddingLeft = el.__opt.pl; el.style.paddingRight = el.__opt.pr; }
+    var icons = Array.prototype.filter.call(el.children, function(c){ return c.classList.contains('icon'); });
+    icons.forEach(function(ic){ var s = ic.querySelector('svg'); if(s) s.style.transform = ''; });
+    var R = el.getBoundingClientRect(); if(!R.width || !R.height || !el.offsetParent) return;
+    var cs = getComputedStyle(el), col = /^column/.test(cs.flexDirection);
+    if(!/flex/.test(cs.display)) return;
+    var text = optTextInk(el), inks = icons.map(optIconInk).filter(Boolean);
+    if(!text && !inks.length) return;
+    if(col && /baseline|start/.test(cs.alignItems)) el.style.alignItems = 'center';
+    // 1. each icon: ink centered on the capitals (row) or over the text (column); icon-only: ink on its box
+    inks.forEach(function(ik){
+      var dx = 0, dy = 0, ib = ik.svg.parentElement.getBoundingClientRect();
+      if(text && !col) dy = (text.t + text.b) / 2 - (ik.t + ik.b) / 2;
+      else if(text && col) dx = (text.l + text.r) / 2 - (ik.l + ik.r) / 2;
+      else { dx = (ib.left + ib.right) / 2 - (ik.l + ik.r) / 2; dy = (ib.top + ib.bottom) / 2 - (ik.t + ik.b) / 2; }
+      dx = Math.max(-4, Math.min(4, dx)); dy = Math.max(-4, Math.min(4, dy));
+      if(Math.abs(dx) >= 0.25 || Math.abs(dy) >= 0.25) ik.svg.style.transform = 'translate(' + dx.toFixed(2) + 'px,' + dy.toFixed(2) + 'px)';
+      ik.l += dx; ik.r += dx; ik.t += dy; ik.b += dy;
+    });
+    // 2. the whole group: ink centered in the button (only where content is meant to be centered)
+    // Horizontal centering only where content is meant to be centered; vertical centering for any
+    // button whose content is centered top to bottom (align-items or align-content center), even
+    // when justify-content was left at its default (a display:flex .go button skipped this once and
+    // its label sat 1.3px low on the Workout Tracker).
+    var hCenter = /center/.test(cs.justifyContent) || cs.display === 'inline-flex', vCenter = /center/.test(cs.alignItems + ' ' + cs.alignContent);
+    if(!hCenter && !vCenter) return;
+    var all = inks.concat(text ? [text] : []);
+    var ink = all.reduce(function(a, b){ return { l: Math.min(a.l, b.l), r: Math.max(a.r, b.r), t: Math.min(a.t, b.t), b: Math.max(a.b, b.b) }; });
+    var bl = parseFloat(cs.borderLeftWidth) || 0, br = parseFloat(cs.borderRightWidth) || 0, bt = parseFloat(cs.borderTopWidth) || 0, bb = parseFloat(cs.borderBottomWidth) || 0;
+    var gx = (R.left + bl + R.right - br) / 2 - (ink.l + ink.r) / 2, gy = (R.top + bt + R.bottom - bb) / 2 - (ink.t + ink.b) / 2;
+    // Column buttons keep their boxes vertically, so a row of them lines up label to label
+    // whatever the icon's shape; icon-only buttons were already centered above.
+    if(col || !text) return;
+    var pl = parseFloat(cs.paddingLeft), pr = parseFloat(cs.paddingRight), pt = parseFloat(cs.paddingTop), pb = parseFloat(cs.paddingBottom);
+    if(!el.__opt) el.__opt = { pt: el.style.paddingTop, pb: el.style.paddingBottom, pl: el.style.paddingLeft, pr: el.style.paddingRight };
+    if(hCenter && Math.abs(gx) >= 0.5 && Math.abs(gx) <= 6 && pl + gx >= 0 && pr - gx >= 0 && /center/.test(cs.justifyContent + cs.display)){ el.style.paddingLeft = (pl + gx).toFixed(2) + 'px'; el.style.paddingRight = (pr - gx).toFixed(2) + 'px'; }
+    if(vCenter && Math.abs(gy) >= 0.5 && Math.abs(gy) <= 6){
+      if(pt + gy >= 0 && pb - gy >= 0){ el.style.paddingTop = (pt + gy).toFixed(2) + 'px'; el.style.paddingBottom = (pb - gy).toFixed(2) + 'px'; }
+      else {
+        // Buttons sized by min-height with no vertical padding (padding: 0 20px): moving padding
+        // between top and bottom isn't possible, so add it on one side only. In a min-height box
+        // that moves the centered content by half of it without changing the height; if the
+        // height would grow, undo it.
+        var h0 = el.offsetHeight;
+        if(gy < 0) el.style.paddingBottom = (pb - 2 * gy).toFixed(2) + 'px'; else el.style.paddingTop = (pt + 2 * gy).toFixed(2) + 'px';
+        if(el.offsetHeight !== h0){ el.style.paddingTop = el.__opt.pt; el.style.paddingBottom = el.__opt.pb; }
+      }
+    }
+  }
+  var optQueued = false;
+  function opticalCenter(){
+    if(optQueued) return; optQueued = true;
+    requestAnimationFrame(function(){ optQueued = false; document.querySelectorAll(OPT_SEL).forEach(function(el){ try{ optFix(el); }catch(e){} }); });
+  }
+  if(window.MutationObserver) new MutationObserver(opticalCenter).observe(document.documentElement, { childList: true, subtree: true });
+  window.addEventListener('resize', opticalCenter);
+  if(document.fonts){ document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', function(){ optCaps = {}; opticalCenter(); }); document.fonts.ready.then(function(){ optCaps = {}; opticalCenter(); }); }
+
+  /* ============================================================
+     MARKER DATA (Ohuhu's official set charts; old codes per line)
+     colors: [new code, name, hex, Honolulu old code, Oahu old code]
+     ============================================================ */
+  var DATA = {"colors":[["120","Black","2A2C29","120","120"],["B010","Blue Lagoon","67B8CD","","B389"],["B015","Celadon Blue","05769C","B090",""],["B02","Light Minty Blue","C3E2E5","BG4",""],["B03","Frost","C9DCE3","B030","B996"],["B05","Robin Egg Blue","B2D6E3","B050",""],["B06","Light Cerulean","8FCDDF","B110",""],["B07","Light Blue","99CEE1","","B292"],["B08","Cotton Candy Blue","86C5D6","PB7","B289"],["B09","Tahitian Blue","62B2CD","B070",""],["B111","Pool Blue","2197C9","PB8","B883"],["B112","Process Blue","138DB9","B080","B683"],["B114","Cerulean Blue","157696","B64","B860"],["B115","Classic Blue","0D5E95","PB6","B956"],["B21","Porcelain Blue","E3F1F1","MG020",""],["B27","Fog Blue","C4D6E0","MG030","MG030"],["B28","Smoke Blue","AFCBE0","B250","B190"],["B310","Blue Dusk","AEC5CD","BGII03","MG031"],["B311","Stone Blue","93B5C4","MG060","MG060"],["B315","Deep Cerulean","4E7D8F","PB11","B459"],["B411","Rich Slate Blue","7594A2","BGII05","MG069"],["B412","Gunmetal Blue","627F8F","MG100",""],["B415","Stormy Night","4C5A67","BGII09","MG170"],["BG010","Peacock Blue","41AFB0","","G482"],["BG011","Teal","21A6AB","G500",""],["BG04","Sea Spray","BADBE0","G322",""],["BG05","Light Sea Blue","A7D4D9","BG68","G191"],["BG09","Aquamarine","89C7C6","G326",""],["BG114","Faded Teal","60B2B8","PB9",""],["BG115","Dark Teal","4F8EA0","","G460"],["BG19","Sea Blue","8ECACA","G324",""],["BG21","Mint Whisp","E7F1E9","G320",""],["BG211","Spearmint","79BEA1","G360","G382"],["BG212","Bright Pine Green","3DA98F","G4","G473"],["BG215","Dark Pine Green","178A79","BG8",""],["BG22","Mint Mist","D3E8DA","","G693"],["BG24","Sea Glass Blue","C5DECB","G420","G786"],["BG310","Seafoam Green","AED7CE","G340","G190"],["BG311","Turquoise","51B2A1","PB10","G477"],["BG312","Deep Turquoise","40A49A","","G471"],["BG314","Peacock Green","048984","BG6","G862"],["BG315","Castleton Green","2E807A","BG7","G850"],["BGY00","Cashmere Grey","D7DDDD","BG050","BG050"],["BGY02","Pigeon Grey","BAC2C5","BG9",""],["BGY05","Shark Grey","888F96","","BG082"],["BGY08","Gentleman Grey","58707B","","MG109"],["BGY13","Seagull Grey","9FA7AA","GG060",""],["BGY15","Blue Steel Grey","909E9F","GG5","GG080"],["BGY17","Cyberspace","707E81","","GG090"],["BGY18","Graphite Grey","727A7D","GG9",""],["BGY24","Storm Grey","728089","CGII07","BG083"],["BGY25","Cracked Pepper","6B757E","CGII08",""],["BGY35","Iron Grey","686C77","CGII09",""],["BGY36","Navy Grey","5D6A74","","BG120"],["BGY38","Charcoal Grey","525659","NG09","CG140"],["BV013","French Ultramarine","405A9D","B380","B572"],["BV014","Ultramarine","2B519A","","B768"],["BV015","Deep Ultramarine","47549A","B440",""],["BV03","Powder Blue","E1E6F3","","B991"],["BV04","Light Cornflower","C5D6EA","","B188"],["BV05","Cornflower","A4C1E1","B340","B287"],["BV08","Havelock Blue","84A4CD","B350",""],["BV09","Deep Cornflower","6986BC","","B369"],["BV115","Shadow Blue","707190","V450",""],["BV15","Dusty Periwinkle","C2C5D8","V340",""],["BV18","Hydrangea Blue","A9A9CB","","V281"],["BV19","Blue Iris","A1A4C3","","B271"],["BV210","Blueberry","525D9D","V390","V473"],["BV26","Pale Blue Violet","B6B7D8","R25","B281"],["BV27","Bluebell","919AC6","","V377"],["BV28","Bluebonnet","6C7CB6","V370","V381"],["BV29","Iris","6471A5","R13",""],["BV31","Cloud Blue","E3E8EC","BG3","MG011"],["BV310","Brilliant Blue","5382B6","PB2","B575"],["BV311","Royal Blue","2063A7","B180","B672"],["BV312","Deep Royal Blue","1F62A6","B190","B878"],["BV314","Lapis Lazuli","476E9F","PB3","B659"],["BV315","Cobalt Blue","366792","PB4","B953"],["BV32","Pale Sky Blue","DAEBF2","B220",""],["BV34","Ice Blue","CFDFEA","","B194"],["BV35","Arctic Blue","B9D6E8","B120","B193"],["BV37","Glacier Blue","80ADD2","","B294"],["BV38","Sky Blue","90B5D9","PB1","B290"],["BV414","Denim Blue","6D91B3","B270","B383"],["BV415","Antwerp Blue","4580A1","B290","B563"],["BV48","Distressed Denim","9DB5CD","B260","B291"],["BV514","Vintage Navy","4F6A92","PB5","B463"],["BV58","Crystal Blue","8BC0E0","B140",""],["BV59","Summer Sky","80A2D0","","B384"],["CG01","Cloud Grey","EEEEEE","CG020",""],["CG02","Light Grey","E7E7E9","CG030",""],["CG03","Beacon Grey","E4E8E9","","CG022"],["CG13","Thundercloud Grey","E1E1E2","","CG023"],["CG14","Pewter Grey","D7D8D8","","CG040"],["CG17","Cool Grey","A0A4AD","CG5","BG081"],["CG18","Icy Grey","9CA3AD","CGII04",""],["CG24","Grey","BBBFBE","CG050",""],["CG25","Deep Grey","A9ABAA","NG03","CG041"],["CG26","Anchor Grey","9D9FA0","","CG051"],["CG27","Dark Grey","878A8F","","CG071"],["CG28","Web Grey","7E8386","CG070","CG070"],["E011","Pale Camo Green","AAA992","E434",""],["E03","Pale Sage","ECEEDF","","G391"],["E05","Pale Moss","E3E5CE","G220",""],["E06","Bog Mist Green","DAD5BF","E432",""],["E111","Pewter Green","BBAA93","YG100","YG100"],["E13","Limestone","DBD3BC","","E195"],["E14","Khaki Beige","DBD0BE","YG040",""],["E17","Sage Grey","D7CAA7","Y250",""],["E19","Dried Sage","CCC2A7","YG080",""],["E211","Light Elm Wood","D0B588","E440",""],["E212","Dusty Olive","BDA776","Y7",""],["E215","Dark Khaki Green","786A57","","YG130"],["E22","Lime Juice","EFE4C6","GY173",""],["E26","Pale Celery","E9D3AE","Y230","Y190"],["E30","French Grey","E0D4C2","","E989"],["E311","Sandbar Brown","B99F84","E300",""],["E312","Fennel Seed","B09772","","E463"],["E313","Swamp Mud","8D795E","E450",""],["E314","Military Olive","786757","E460",""],["E315","Vandyke Brown","7C6A5C","","E440"],["E36","Old Salem Grey","DBC6A3","","E289"],["E411","Tumbleweed","C2926B","","E475"],["E413","Dark Brown","997F68","E310","E460"],["E415","Cedar Brown","8E6B57","BR1","E557"],["E44","Soft Sand","F3D6B6","E160",""],["E46","Coral Sand","EABA96","E220",""],["E47","Camel","DCB38F","YR209","E288"],["E49","Honey Brown","D5AA8F","Y145","E294"],["E511","Chocolate Mocha","956D63","Y12","E357"],["E513","Taupe Brown","816F65","YR95","E340"],["E514","Dark Chocolate","7A655E","YR92","E342"],["E515","Black Brown","625350","Y13","E533"],["E58","Fawn Brown","C39981","E170",""],["E59","Chestnut","A97762","YR9","E367"],["E610","Light Mahogany","B87364","E060",""],["E612","Brick Brown","A37668","YR10","E558"],["E613","Rustic Brown","965F54","","E769"],["E614","Maple Syrup","8E5F57","E130",""],["E615","Cherry Cola","7C5348","YR91","E644"],["E64","Rose Beige","CDB0A2","","E180"],["E66","Light Fawn","C8A48F","YR148","E189"],["E69","Russet Brown","D6AA8F","E120","E373"],["E710","Clay Rose","C18E84","","E363"],["E711","Old Mahogany","A77C73","R27","E364"],["E712","Rosewood","A6716F","","E355"],["E713","Red Bean","955D5E","R284",""],["E714","Brick Mauve","875454","","R446"],["E75","Light Rose Taupe","E0B6AA","R26","E190"],["E81","Spanish Pink","F4DAD7","R30","R192"],["E814","Caput Mortuum","816763","R28","E258"],["E85","Cherry Taupe","E4C2C0","E050","E183"],["E912","Mauve Taupe","A7857B","","E262"],["E913","Walnut Brown","8B7069","","E356"],["E914","Bark Brown","80635F","E430",""],["E915","Dark Bark Brown","625450","","E530"],["E92","Ash Rose","E1D2CB","E380",""],["E93","Sandy Taupe","D9C6BD","","E188"],["E97","Deep Rose Grey","BFA29C","E400",""],["FY00","Fluorescent Yellow","E1DE59","FY010","FY010"],["FY01","Fluorescent Orange","E78D3E","FY020","FY020"],["FY02","Fluorescent Red","DE6864","FY030","FY030"],["FY03","Fluorescent Pink","D76B9B","","FY040"],["FY04","Fluorescent Violet","797BB3","FY050","FY050"],["G012","Mineral Green","9DBFB1","G330",""],["G013","Muted Turquoise","81ADAC","BG5",""],["G112","Pale Cobalt Green","94B6A6","G9","G177"],["G113","Dusty Jade Green","71A28F","G6",""],["G114","Aged Pine Green","649287","G5",""],["G210","Sea Green","7DB294","G490","G370"],["G213","Malachite","3BA084","","G458"],["G215","Dark Green","168B77","","G448"],["G24","Celadon","C4D2C1","G410","G493"],["G29","Faded Green","8DB197","","G271"],["G310","Shamrock Green","6AA974","G2","G472"],["G311","Jade Green","5DB180","G3",""],["G312","Emerald Green","24946E","G1","G750"],["G313","Green","2B7F5E","G390",""],["G315","Dark Emerald","1F7A6B","BG1","G950"],["G316","Deep Jade Green","356E65","BG2","G840"],["G34","Pale Green","CDE4CA","G120","G794"],["G36","Glass Green","91C49B","G8",""],["G41","Peppermint","D9E9CF","G110","G796"],["G410","Grass Green","93B568","GY2","G483"],["G43","Vintage Pale Green","DAE7CE","GY172",""],["G44","Sea Glass Green","BCDAB8","G440","G185"],["G47","Spring Green","A6CE90","G140","G189"],["G49","Sour Apple","ACC88D","GY1","G284"],["GG03","Silver Cloud","D3DFDD","GG1","GG010"],["GG05","Evergreen Fog","9CABA8","GG3","GG030"],["GG07","Steel Grey","88898B","GG110",""],["GG10","Soft Cool Grey","D6D7D9","CG2","BG042"],["GG11","Fog Grey","BDBEC2","BG060","BG043"],["GG12","Pastel Icy Grey","ACB9BF","BG070","BG080"],["GG15","Dark Neutral Grey","5F636A","NG07","CG090"],["GG16","Dark Anchor Grey","696D71","NG06","CG080"],["GG18","Deep Slate","5A5F65","","CG130"],["GG20","Mist Grey","E3E5E1","","CG021"],["GG24","Wispy Grey","D1D3CE","GG020",""],["GG25","Pilgrim Haze","B8C4BD","GG040",""],["GG28","Forest Grey","6E746C","","YG140"],["R012","Fruit Punch","D75E55","R070",""],["R013","Tomato","D36959","Y5",""],["R014","Deep Vermilion","BF544C","R2","R687"],["R015","Crimson","AC4549","R3","R586"],["R016","Chili Red","A73E3A","R180",""],["R111","Hot Pink Carnation","CD7BAF","","R588"],["R112","Reddish Pink","DA696D","R150",""],["R15","Lychee Juice","F3C2BD","R110","R197"],["R16","Light Salmon","F6C6C6","R21","R193"],["R19","Rose Coral","D5767A","","R394"],["R210","Deep Blush","D47F94","R1","R393"],["R211","Ruby","AD4E66","R230",""],["R212","Mulberry","B44D6B","R170",""],["R213","Pomegranate","B34C61","R6","RV783"],["R214","Cranberry","A9475A","","R872"],["R215","Morello Cherry","934D53","R8","R865"],["R22","Ballet Pink","FAE6E7","RV260",""],["R23","Sakura","F9D8DF","RV270","RV193"],["R25","Tender Pink","ECAABE","RV300",""],["R26","Valentine Pink","E39FB4","R190",""],["R27","Pink Satin","DB8DA5","R120","R296"],["R28","Pink Carnation","E397B1","R9","R293"],["R310","Purplish Pink","C46D8E","RV330","RV591"],["R312","Magenta","B6536F","RV350",""],["R38","Rose Pink","DA8AA7","R23","RV390"],["R410","Raspberry","CE6472","R160",""],["R412","Cerise","C25069","R4","R584"],["R413","Amaranth","B95368","R5","RV687"],["R414","Light Maroon","B65F71","","R585"],["R46","Old Rose","D3868C","R12",""],["R48","Cherry Rose","D16E80","R200","R490"],["R50","Orchid Wisp","F8E7ED","R242","R495"],["R510","Wine Red","8B505D","","R457"],["R513","Deep Wine","90545C","R290","R455"],["R514","Prune Juice","8D5062","R7","RV757"],["R54","Lavender Fog","E1C7D2","R250","R189"],["R56","Puce","D3AFB9","R270",""],["R57","Rose Dust","C0859B","R280","R278"],["R58","Garnet Rose","B26A7B","","R480"],["R59","Wine Berry","9A5568","R240","R468"],["R612","Raisin","805C66","R340","R247"],["R613","Burgundy Bark","7A5F61","","R341"],["R615","Black Grape","6B5A64","R350",""],["R68","Deep Mauve","A6808A","","R275"],["R69","Dark Mauve","9D747A","R282",""],["RV01","Water Lily","FEF3F9","RV010",""],["RV04","Light Orchid","F0C5D9","RV030","RV910"],["RV05","Pink Pearl","F0BAD2","RV280","RV198"],["RV08","Pastel Pink","E595B8","R10","RV210"],["RV09","Disco Pink","E17EAA","RV070","RV394"],["RV111","Hot Pink","D6558E","RP6","RV610"],["RV17","Pink","EAA7B9","R22","R295"],["RV18","Bubblegum","E696B3","R14","RV211"],["RV19","Dahlia Pink","E38BB0","R15","RV398"],["RV210","Orchid Rose","C26E95","","RV477"],["RV211","Raspberry Pink","C64883","","RV593"],["RV212","Rich Raspberry","CE337E","RP1","RV789"],["RV23","Pink Wisp","F4DCE9","RV130","RV192"],["RV24","Dull Pink","ECBED5","","RV194"],["RV25","Rosy Lilac","E8B7CD","RV180","RV295"],["RV27","Orchid Pink","D28CB2","","RV380"],["RV28","Hibiscus Pink","CB85AA","RV200","RV288"],["RV29","Plum Pink","C7759D","RV320","RV490"],["RV31","Lilac Mist","F4E3EE","","RV195"],["RV310","Fuchsia","C65C92","RV100",""],["RV311","Pansy","B8478C","P2","V567"],["RV313","Dark Pansy","AD3883","","RV777"],["RV314","Grape Juice","934171","P1","RV968"],["RV316","Grape Jelly","7B4179","R16","V651"],["RV32","Lilac Blush","F7E2ED","","V192"],["RV33","Thistle","EAD1E4","RV160",""],["RV34","Faded Lilac","ECD1E4","V020",""],["RV35","Bright Lilac","E3C3DA","V150","V191"],["RV39","Bright Fuchsia","D2709F","RV080","V497"],["RV45","Plum Blossom","D4B8C8","","R186"],["RV514","Violet Merlot","935D79","RV240","V457"],["RV515","Ripe Mulberry","845072","RV250","V649"],["RV53","Lilac","DFCAE0","","V789"],["RV57","Dark Lilac","D1A9CB","V160","185"],["RV58","Deep Lilac","C392B5","","V280"],["V010","Faded Violet","9277AA","P4","V369"],["V013","Violet","85598E","V210","460"],["V015","Deep Violet","846F8E","V080","463"],["V016","Eggplant","71597F","","449"],["V07","Smoky Lavender","A590BD","","V276"],["V08","Light Violet","A888B9","V050",""],["V09","Vintage Purple","9F78AC","","268"],["V112","Vivid Violet","A16AA3","V070",""],["V12","Dusty Orchid","E3D6E9","","V890"],["V13","Greyed Lavender","E0D3E7","R11","V891"],["V14","Pale Purple","CEB7D3","V030",""],["V18","Bright Lavender","D5B0CF","P3","V284"],["V214","Purple","745196","","V660"],["V216","Morning Glory","5A4C97","R17",""],["V22","Lavender Wisp","DCD3E8","V230",""],["V23","Pale Lavender","D5CDE3","","V188"],["V24","Evening Petunia","C4B7D6","","V287"],["V25","Violet Rose","C7B1D1","","V289"],["V29","Dull Violet","9185AD","V060","380"],["V32","Icy Periwinkle","E3E9F5","V322","V889"],["V33","Lavender Mist","E0E4F0","","B990"],["V34","Periwinkle","DBD9EE","V330",""],["V35","Lavender Silk","C2BEDC","","V187"],["V38","Deep Periwinkle","B0AED3","R24","V189"],["V411","Lavender Indigo","968EBB","","V366"],["V412","Lobelia","9C8ABE","V270",""],["V413","Blue Violet","746AA3","","V558"],["V414","Electric Indigo","695F9B","V320",""],["V416","Deep Purple","4A407F","P5",""],["V46","Lavender","B0A5CD","V250",""],["WG01","Lite Lavender","E0D5DB","RG110",""],["WG04","Icy Lavender","D8D2D4","RG120",""],["WG05","Lavender Grey","D9D2D6","","RG140"],["WG06","Star Dust","B3A8B0","RG150","RG160"],["WG08","Heathered Grape","92858C","RG080","RG080"],["WG10","Porcelain","F5F5F3","CGII00","BG038"],["WG12","Smoke White","E5E5E3","","BG041"],["WG23","Dorian Grey","D5D3D0","","WG160"],["WG24","Pavestone Grey","CAC0BF","","RG040"],["WG26","Silver Grey","BEB4B3","WG3",""],["WG27","Antique Silver","ACA2A0","WG4","WG170"],["WG28","Jet Grey","8E8988","","WG180"],["WG35","Peppercorn Grey","7F7572","","WG190"],["WG36","Deep Slate Grey","655C5E","","WG200"],["WG37","Dark Charcoal","636162","WG09",""],["WG38","Caviar","545557","WG130",""],["Y00","Lemon Mist","FDFBEF","Y010",""],["Y02","Lemon Chiffon","F2EBBD","Y030","Y196"],["Y03","Pastel Yellow","F3F1C1","G030","G193"],["Y06","Butter","F0E190","Y040",""],["Y07","Banana Cream","E8D588","GY6",""],["Y08","Pineapple","E6D27D","","Y397"],["Y09","Summer Lemon","E2CE6F","Y050",""],["Y111","Mustard","E3AF35","Y2","Y696"],["Y14","Pale Lemon Yellow","EDEBA0","G020","G195"],["Y17","Bright Lemon Yellow","EBDE6B","Y080",""],["Y19","Canary","E9CD3D","Y070",""],["Y210","Pumpkin Yellow","DF9948","YR34","Y593"],["Y211","Deep Yellow","D9963F","","Y697"],["Y213","Dark Marigold","D98F46","YR2","Y792"],["Y214","Sweet Potato","D3853E","","YR593"],["Y215","Toffee","CC8543","Y180",""],["Y216","Caramel","C38C49","YR1","Y583"],["Y26","Light Gold","E8C470","Y3","Y295"],["Y27","Sunflower","E6BB5F","Y1","Y494"],["Y28","Corn Yellow","E0AF52","Y6","Y495"],["Y29","Melon Yellow","E4A03D","YR33","Y691"],["Y310","Gold Satin","DAB466","","Y488"],["Y311","Termite Beige","D4AF6B","Y270",""],["Y315","Olive Yellow","BB8E4D","Y8","Y764"],["Y34","Eggnog Yellow","FAF0DC","Y121","Y195"],["Y37","Light Gold","E9CB9D","","Y291"],["Y39","Straw","E1C282","Y260",""],["Y410","Goldenrod","E3AF69","YR260",""],["Y411","Eggshell Brown","EAB47F","","YR394"],["Y412","Apple Cider","DEAB80","E490",""],["Y413","Fawn","D2A377","E240",""],["Y415","Sand Storm","C5925B","Y9","Y585"],["Y416","Golden Brown","AA784B","Y210","Y569"],["Y42","Warm Ivory","F5E4CA","Y110",""],["Y43","Warm Beige","F3E0C4","YR212","E191"],["Y45","Cream","EEC49A","YR240",""],["Y46","Peach Yogurt","ECB87E","YR250",""],["Y48","Light Apricot","E6B479","YR6","Y396"],["Y49","Autumn Leaf","E3B268","Y140",""],["Y515","Light Walnut","B48569","E370",""],["Y516","Walnut Brown","996C4D","","E761"],["Y55","Golden Champagne","F8E1C2","Y120",""],["Y57","Unbleached Almond","F4D0A2","","E293"],["Y59","Marigold Yellow","E1B97B","Y130",""],["Y610","Sand","DAC09E","","E182"],["Y611","Dark Sand","CDA780","Y11","E280"],["Y613","Twine Beige","BFA176","","E371"],["Y615","Olive Wood","A38059","","Y468"],["Y62","Sandy Beige","F6E9D9","E280",""],["Y66","Light Cream","E4C49D","","E286"],["Y68","Milk Tea","E2CBA9","","E187"],["Y69","Milk Tea","E0C6A5","E210",""],["YG012","Yellow Green","CAC976","GY4","G289"],["YG013","Olive Gold","C4BB50","","G487"],["YG014","Matcha","9FA14D","","G369"],["YG015","Dark Olive","8D8753","GY42","G554"],["YG06","Sugarcane","DADFA4","GY7",""],["YG07","Honeydew Melon","D9DC8F","G050","G291"],["YG111","Celery","DFD78C","G060","G292"],["YG112","Lemon Lime","DED56E","G070","G495"],["YG113","Pear Green","CFC651","G080",""],["YG114","Olive Green","B9A54E","","G578"],["YG211","Edamame","ACB655","GY5",""],["YG212","Guacamole","9C9350","GY8","G468"],["YG215","Thatch Green","8C8568","G300","G536"],["YG29","Apple Green","B6C079","G260","G287"],["YG312","Artichoke Green","ABB880","G270",""],["YG313","Camo Green","96A372","","G364"],["YG36","Beige Green","BBC7A3","G240",""],["YG413","Fern Green","7B9B6B","G470",""],["YG414","Dark Fern Green","698868","GY43","G345"],["YG415","Cascade Green","5C7265","G7",""],["YG510","Bud Green","AEBE62","GY3","G479"],["YG610","Bright Lime","9BC15A","G170","G494"],["YG611","Mantis Green","8BB85B","G190",""],["YG66","Fresh Green","CFDFAC","G130","G299"],["YGY01","Cornforth White","EEE9E5","","RG020"],["YGY02","Abalone Grey","E5E0DA","RG030",""],["YGY03","Worldly Grey","E5DAD1","","E685"],["YGY05","Dovetail Grey","BFB4B2","RG050",""],["YGY11","Collingwood Grey","D5CDC2","WG01","WG150"],["YGY13","Oyster Grey","DBD9CC","WG050","WG050"],["YGY17","Platinum Grey","C0B6AC","WG070",""],["YGY18","Stone Grey","948B86","WG090",""],["YGY21","Linen Grey","EBEAE5","","YG010"],["YGY22","Pebble Grey","DEDBD8","","YG020"],["YGY24","Sage Ash","CDCBC4","","YG030"],["YGY25","Silver Sage","CFD0C8","","YG040"],["YGY26","Moss Grey","B0AD9F","","YG051"],["YGY27","Olive Ash","9E9B8C","","YG150"],["YR00","Barely Blush","FDEDDD","E010",""],["YR014","Orange Peachy Blush","D28456","","YR687"],["YR015","Burnt Orange","D47E4B","YR172",""],["YR02","Peach Silk","FCE9DB","WG0.5","WG140"],["YR03","Pastel Blush","F9E7D9","YR220",""],["YR04","Pastel Peach","F8E6D8","R18","E494"],["YR05","Cotton Pearl","F9E2D4","E020",""],["YR06","Raw Cashew","F6D6BF","E090",""],["YR07","Salmon Orange","F3BD99","YR4","YR295"],["YR09","Sandstone","E9A16F","YR7","YR596"],["YR11","Peachy Blush","FADFCE","YR110","YR297"],["YR110","Tangerine","E08C50","","YR695"],["YR111","Persimmon","E68943","Y10",""],["YR112","Orange","E58440","YR3","YR792"],["YR114","Deep Sunset Orange","E16E4D","","YR892"],["YR17","Sunset Orange","F1B785","Y4",""],["YR19","Marigold Orange","EAAC5D","YR170","YR696"],["YR213","Squash Orange","D88E47","YR180",""],["YR214","Terracotta","D5836D","","E686"],["YR215","Aged Cherry Wood","B35D4E","E080",""],["YR25","Powder Orange","EFB296","YR205","YR196"],["YR27","Peach Cobbler","E7A07E","","YR496"],["YR29","Grapefruit","E6946E","YR8","YR495"],["YR310","Light Toffee","CD9579","","E384"],["YR312","Light Earth Brown","C88E6E","E110",""],["YR313","Potato Brown","B77855","BR2","E763"],["YR314","Sandalwood","A96D51","E260",""],["YR316","Cinnamon Bark","8C5E4B","","E645"],["YR33","Rose Cream","F7DDD0","R19","R196"],["YR34","Peach Cream","F3CBBF","R20","E194"],["YR36","Peach Tan","EDB89A","","E399"],["YR37","Roasted Cashew","E9B389","YR20","E477"],["YR38","Burnt Ochre","DFA57F","YR107","YR492"],["YR39","Cinnamon","DEA182","BR3","E287"],["YR43","Pale Cherry Pink","F9DCD4","R080",""],["YR44","Blush Beige","F0D1C4","","R194"],["YR45","Rosewater","F3CBBF","E030",""],["YR47","Dusty Peach","EFC7BB","R29","R195"],["YR510","Coral Peach","ECA28D","","YR493"],["YR511","Pale Coral","EA9E7F","YR090","YR494"],["YR513","Papaya","E17856","YR190",""],["YR515","Burnt Sienna","C47559","YR5","E679"],["YR52","Cameo Rose","F8E4DC","YR030","YR198"],["YR54","Pink Frost","F6D9CF","","R198"],["YR55","Pink Lemonade","EEC9BE","E470",""],["YR56","Light Apricot Pink","F2CCC1","R090",""],["YR57","Tropical Peach","F3B7A5","BR208","YR296"],["YR58","Pink Sand","F5C1B4","R050","R294"],["YR59","Cantaloupe","EFB09E","YR070",""]],"sets":[{"k":"h24","line":"h","label":"Honolulu 24","group":"Basic","codes":["Y111","Y26","Y216","YR313","R014","R210","R413","RV08","RV311","V010","V18","V416","BV310","B08","B111","BG114","BG311","G36","G310","G312","G410","CG18","BGY24","120"]},{"k":"h48","line":"h","label":"Honolulu 48","group":"Basic","codes":["Y111","Y26","Y216","YR313","R014","R210","R413","RV08","RV311","V010","V18","V416","BV310","B08","B111","BG114","BG311","G36","G310","G312","G410","CG18","BGY24","120","Y07","Y213","YR07","YR11","YR39","YR515","E415","R28","R215","R412","R514","RV212","RV314","V13","BV38","B115","G114","G315","G49","YG012","YG211","YG510","YGY11","WG10"]},{"k":"h72","line":"h","label":"Honolulu 72","group":"Basic","codes":["Y111","Y26","Y216","YR313","R014","R210","R413","RV08","RV311","V010","V18","V416","BV310","B08","B111","BG114","BG311","G36","G310","G312","G410","CG18","BGY24","120","Y07","Y213","YR07","YR11","YR39","YR515","E415","R28","R215","R412","R514","RV212","RV314","V13","BV38","B115","G114","G315","G49","YG012","YG211","YG510","YGY11","WG10","Y29","YR17","E22","R013","R46","RV111","BV29","BV31","B02","B114","BG212","G013","G112","G113","G43","YG06","YG212","CG17","BGY15","WG26","WG27","GG03","GG05","GG10"]},{"k":"h120","line":"h","label":"Honolulu 120","group":"Basic","codes":["Y111","Y26","Y216","YR313","R014","R210","R413","RV08","RV311","V010","V18","V416","BV310","B08","B111","BG114","BG311","G36","G310","G312","G410","CG18","BGY24","120","Y07","Y213","YR07","YR11","YR39","YR515","E415","R28","R215","R412","R514","RV212","RV314","V13","BV38","B115","G114","G315","G49","YG012","YG211","YG510","YGY11","WG10","Y29","YR17","E22","R013","R46","RV111","BV29","BV31","B02","B114","BG212","G013","G112","G113","G43","YG06","YG212","CG17","BGY15","WG26","WG27","GG03","GG05","GG10","Y27","Y28","Y315","Y415","Y611","YR04","YR111","YR33","YR34","E212","E511","E515","R015","R16","R213","R38","RV17","RV18","RV19","RV316","V216","V38","BV26","BV314","BV315","BV514","B310","B315","B411","B415","BG05","BG215","BG314","BG315","G311","G316","YG015","YG414","YG415","CG25","BGY02","BGY18","BGY25","BGY35","BGY38","WG37","GG15","GG16"]},{"k":"h168","line":"h","label":"Honolulu 168","group":"Basic","codes":["Y111","Y26","Y216","YR313","R014","R210","R413","RV08","RV311","V010","V18","V416","Y07","Y213","YR07","YR112","YR39","YR515","E415","R28","R215","R412","R514","RV212","Y29","YR17","E22","R013","R46","RV111","BV29","BV31","B02","B114","BG212","G013","Y27","Y28","Y315","Y415","Y611","YR04","YR111","YR33","YR34","E212","E511","E515","BV315","BV514","B310","B315","B411","B415","BG05","BG215","BG314","BG315","G311","G316","BV310","B08","B111","BG114","BG311","G36","G310","G312","G410","CG18","BGY24","120","RV314","V13","BV38","B115","G114","G315","G49","YG012","YG211","YG510","YGY11","WG10","G112","G113","G43","YG06","YG212","CG17","BGY15","WG26","WG27","GG03","GG05","GG10","R015","R16","R213","R38","RV17","RV18","RV19","RV316","V216","V38","BV26","BV314","YG015","YG414","YG415","CG25","BGY02","BGY18","BGY25","BGY35","BGY38","WG37","GG15","GG16","Y02","Y14","Y45","Y55","Y62","Y69","YR06","YR11","YR43","YR52","YR55","YR59","RV25","RV33","RV34","V14","V22","BV05","BV32","BV35","B03","B05","B21","B28","E05","E14","E26","E46","E85","E92","R15","R22","R27","R54","RV04","RV05","BG24","BG310","G34","G47","CG01","CG24","BGY00","YGY02","YGY13","WG01","WG04","GG24"]},{"k":"h216","line":"h","label":"Honolulu 216","group":"Basic","codes":["Y111","Y26","Y216","YR313","R014","R210","R413","RV08","RV311","V010","V18","V416","Y07","Y213","YR07","YR112","YR39","YR515","E415","R28","R215","R412","R514","RV212","Y29","YR17","E22","R013","R46","RV111","BV29","BV31","B02","B114","BG212","G013","Y27","Y28","Y315","Y415","Y611","YR04","YR111","YR33","YR34","E212","E511","E515","BV315","BV514","B310","B315","B411","B415","BG05","BG215","BG314","BG315","G311","G316","BV310","B08","B111","BG114","BG311","G36","G310","G312","G410","CG18","BGY24","120","RV314","V13","BV38","B115","G114","G315","G49","YG012","YG211","YG510","YGY11","WG10","G112","G113","G43","YG06","YG212","CG17","BGY15","WG26","WG27","GG03","GG05","GG10","R015","R16","R213","R38","RV17","RV18","RV19","RV316","V216","V38","BV26","BV314","YG015","YG414","YG415","CG25","BGY02","BGY18","BGY25","BGY35","BGY38","WG37","GG15","GG16","Y02","Y14","Y45","Y55","Y62","Y69","YR06","YR11","YR43","YR52","YR55","YR59","RV25","RV33","RV34","V14","V22","BV05","BV32","BV35","B03","B05","B21","B28","E05","E14","E26","E46","E85","E92","R15","R22","R27","R54","RV04","RV05","BG24","BG310","G34","G47","CG01","CG24","BGY00","YGY02","YGY13","WG01","WG04","GG24","Y09","Y39","Y311","Y46","Y410","Y412","Y413","YR19","YR312","YR513","E19","E211","RV39","RV57","V29","V46","V412","BV08","BV013","BV28","BV48","BV415","BV58","B09","E311","E413","E58","E610","E97","R23","R48","R410","R57","RV09","RV28","RV29","B311","BG211","G44","YG111","YG112","YG36","YG610","YG611","CG28","BGY13","WG06","GG12"]},{"k":"h320","line":"h","label":"Honolulu 320","group":"Basic","codes":["Y111","Y26","Y216","YR313","R014","R210","R413","RV08","RV311","V010","V18","V416","Y07","Y213","YR07","YR112","YR39","YR515","E415","R28","R215","R412","R514","RV212","Y29","YR17","E22","R013","R46","RV111","BV29","BV31","B02","B114","BG212","G013","Y27","Y28","Y315","Y415","Y611","YR04","YR111","YR33","YR34","E212","E511","E515","BV315","BV514","B310","B315","B411","B415","BG05","BG215","BG314","BG315","G311","G316","BV310","B08","B111","BG114","BG311","G36","G310","G312","G410","CG18","BGY24","120","RV314","V13","BV38","B115","G114","G315","G49","YG012","YG211","YG510","YGY11","WG10","G112","G113","G43","YG06","YG212","CG17","BGY15","WG26","WG27","GG03","GG05","GG10","R015","R16","R213","R38","RV17","RV18","RV19","RV316","V216","V38","BV26","BV314","YG015","YG414","YG415","CG25","BGY02","BGY18","BGY25","BGY35","BGY38","WG37","GG15","GG16","Y02","Y14","Y45","Y55","Y62","Y69","YR06","YR11","YR43","YR52","YR55","YR59","RV25","RV33","RV34","V14","V22","BV05","BV32","BV35","B03","B05","B21","B28","E05","E14","E26","E46","E85","E92","R15","R22","R27","R54","RV04","RV05","BG24","BG310","G34","G47","CG01","CG24","BGY00","YGY02","YGY13","WG01","WG04","GG24","Y09","Y39","Y311","Y46","Y410","Y412","Y413","YR19","YR312","YR513","E19","E211","RV39","RV57","V29","V46","V412","BV08","BV013","BV28","BV48","BV415","BV58","B09","E311","E413","E58","E610","E97","R23","R48","R410","R57","RV09","RV28","RV29","B311","BG211","G44","YG111","YG112","YG36","YG610","YG611","CG28","BGY13","WG06","GG12","Y00","Y03","Y06","Y17","Y19","Y215","Y34","Y42","Y49","Y416","Y59","Y515","YR00","YR03","YR015","YR213","YR215","YR314","YR45","YR47","YR57","YR58","YR511","E06","E011","E17","E313","E314","E44","E69","E614","E713","E914","R012","R016","R112","R25","R26","R211","R212","R310","R312","R50","R56","R59","R513","R69","R612","R615","RV01","RV23","RV35","RV310","RV514","RV515","V08","V013","V015","V112","V32","V34","V414","BV015","BV15","BV115","BV210","BV311","BV312","BV414","B06","B015","B112","B27","B412","BG04","BG09","BG011","BG19","BG21","G012","G24","G210","G313","G41","YG07","YG113","YG29","YG215","YG312","YG413","YG66","CG02","YGY05","YGY17","YGY18","WG08","WG38","GG07","GG11","GG25","FY00","FY01","FY02","FY04"]},{"k":"h104","line":"h","label":"Honolulu 104 add-on","group":"Add-ons","codes":["Y00","Y03","Y06","Y17","Y19","Y215","Y34","Y42","Y49","Y416","Y59","Y515","YR00","YR03","YR015","YR213","YR215","YR314","YR45","YR47","YR57","YR58","YR511","E06","E011","E17","E313","E314","E44","E69","E614","E713","E914","R012","R016","R112","R25","R26","R211","R212","R310","R312","R50","R56","R59","R513","R69","R612","R615","RV01","RV23","RV35","RV310","RV514","RV515","V08","V013","V015","V112","V32","V34","V414","BV015","BV15","BV115","BV210","BV311","BV312","BV414","B06","B015","B112","B27","B412","BG04","BG09","BG011","BG19","BG21","G012","G24","G210","G313","G41","YG07","YG113","YG29","YG215","YG312","YG413","YG66","CG02","YGY05","YGY17","YGY18","WG08","WG38","GG07","GG11","GG25","FY00","FY01","FY02","FY04"]},{"k":"hmid48","line":"h","label":"Honolulu 48 Mid-tone","group":"Add-ons","codes":["Y09","Y39","Y311","Y46","Y410","Y412","Y413","YR19","YR312","YR513","E19","E211","RV39","RV57","V29","V46","V412","BV08","BV013","BV28","BV48","BV415","BV58","B09","E311","E413","E58","E610","E97","R23","R48","R410","R57","RV09","RV28","RV29","B311","BG211","G44","YG111","YG112","YG36","YG610","YG611","CG28","BGY13","WG06","GG12"]},{"k":"hpastel96","line":"h","label":"Honolulu 96 Pastel","group":"Pastel & tones","codes":["Y00","Y03","Y06","Y07","Y26","Y42","YR00","YR03","YR05","YR07","YR33","YR45","YR47","YR56","YR57","YR58","E22","R25","R50","RV01","RV23","RV35","V32","V34","V38","BV26","BV31","BV38","B02","B06","B310","BG04","BG09","BG21","G24","G36","G41","G43","G49","YG06","YG07","YG66","CG02","BGY02","YGY11","WG10","GG03","GG10","Y02","Y14","Y45","Y55","Y62","Y69","YR06","YR11","YR43","YR52","YR55","YR59","E05","E14","E26","E46","E85","E92","R15","R22","R27","R54","RV04","RV05","RV25","RV33","RV34","V14","V22","BV05","BV32","BV35","B03","B05","B21","B28","BG24","BG310","G34","G47","CG01","CG24","BGY00","YGY02","YGY13","WG01","WG04","GG24"]},{"k":"hpastel48s","line":"h","label":"Honolulu 48 Pastel (Sweetness)","group":"Pastel & tones","codes":["Y02","Y14","Y45","Y55","Y62","Y69","YR06","YR11","YR43","YR52","YR55","YR59","E05","E14","E26","E46","E85","E92","R15","R22","R27","R54","RV04","RV05","RV25","RV33","RV34","V14","V22","BV05","BV32","BV35","B03","B05","B21","B28","BG24","BG310","G34","G47","CG01","CG24","BGY00","YGY02","YGY13","WG01","WG04","GG24"]},{"k":"hpastel48b","line":"h","label":"Honolulu New 48 Pastel (Blossoming)","group":"Pastel & tones","codes":["Y00","Y03","Y06","Y07","Y26","Y42","YR00","YR03","YR05","YR07","YR33","YR45","YR47","YR56","YR57","YR58","E22","R25","R50","RV01","RV23","RV35","V32","V34","V38","BV26","BV31","BV38","B02","B06","B310","BG04","BG09","BG21","G24","G36","G41","G43","G49","YG06","YG07","YG66","CG02","BGY02","YGY11","WG10","GG03","GG10"]},{"k":"hskin24","line":"h","label":"Honolulu 24 Skin Tone","group":"Pastel & tones","codes":["Y415","YR02","YR04","YR09","YR17","YR33","YR34","YR37","YR38","YR313","YR47","YR515","E47","E49","E511","E513","E66","E612","E615","E75","E711","E81","E814","R16"]},{"k":"hskin36","line":"h","label":"Honolulu 36 Skin Tone","group":"Pastel & tones","codes":["Y415","YR02","YR04","YR09","YR17","YR33","YR34","YR37","YR38","YR313","YR47","YR515","E47","E49","E511","E513","E66","E612","E615","E75","E711","E81","E814","R16","Y210","Y216","Y34","Y43","Y48","YR25","YR29","YR39","YR57","E59","E514","E515"]},{"k":"hgray36","line":"h","label":"Honolulu 36 Gray Tone","group":"Pastel & tones","codes":["YR02","E14","E19","E111","B21","B310","B311","B411","B415","CG01","CG02","CG17","CG18","CG25","CG28","BGY00","BGY13","BGY15","BGY18","BGY24","BGY35","BGY38","YGY02","YGY11","YGY13","WG01","WG04","WG06","WG10","WG27","WG37","GG03","GG05","GG10","GG12","GG24"]},{"k":"oa40","line":"oa","label":"Oahu 40","group":"Basic","codes":["Y08","Y28","Y29","Y611","YR04","YR112","YR515","E613","R215","R38","R510","RV08","RV17","RV111","RV314","RV316","V010","V18","BV26","BV38","BV514","B08","B111","B115","B415","BG05","BG010","BG312","BG315","G310","G49","YG012","YG015","BGY05","YGY11","WG27","GG10","FY00","FY01","120"]},{"k":"oa60","line":"oa","label":"Oahu 60","group":"Basic","codes":["Y08","Y28","Y29","Y611","YR04","YR112","YR515","E613","R215","R38","R510","RV08","RV17","RV111","RV314","RV316","V010","V18","BV26","BV38","BV514","B08","B111","B115","B415","BG05","BG010","BG312","BG315","G310","G49","YG012","YG015","BGY05","YGY11","WG27","GG10","FY00","FY01","120","YR02","YR07","YR114","E312","E513","R015","R412","RV311","V38","BV310","BV314","B010","B114","B411","BG212","G410","YG414","WG10","WG36","GG05"]},{"k":"oa80","line":"oa","label":"Oahu 80","group":"Basic","codes":["Y08","Y28","Y29","Y611","YR04","YR112","YR515","E613","R215","R38","R510","RV08","RV17","RV111","RV314","RV316","V010","V18","BV26","BV38","BV514","B08","B111","B115","B415","BG05","BG010","BG312","BG315","G310","G49","YG012","YG015","BGY05","YGY11","WG27","GG10","FY00","FY01","120","YR02","YR07","YR114","E312","E513","R015","R412","RV311","V38","BV310","BV314","B010","B114","B411","BG212","G410","YG414","WG10","WG36","GG05","Y111","Y26","Y27","Y210","Y213","Y216","Y315","Y415","E511","E615","R16","R213","R413","RV212","RV313","BG311","G312","G315","BGY08","WG28"]},{"k":"oa100","line":"oa","label":"Oahu 100","group":"Basic","codes":["Y08","Y28","Y29","Y611","YR04","YR112","YR515","E613","R215","R38","R510","RV08","RV17","RV111","RV314","RV316","V010","V18","BV26","BV38","BV514","B08","B111","B115","B415","BG05","BG010","BG312","BG315","G310","G49","YG012","YG015","BGY05","YGY11","WG27","GG10","FY00","FY01","120","YR02","YR07","YR114","E312","E513","R015","R412","RV311","V38","BV310","BV314","B010","B114","B411","BG212","G410","YG414","WG10","WG36","GG05","Y111","Y26","Y27","Y210","Y213","Y216","Y315","Y415","E511","E615","R16","R213","R413","RV212","RV313","BG311","G312","G315","BGY08","WG28","Y211","YR33","YR34","YR39","YR316","R014","R111","R28","R210","R214","RV19","V214","BV315","B315","BG314","G213","G215","G316","FY02","FY03"]},{"k":"oa120","line":"oa","label":"Oahu 120","group":"Basic","codes":["Y08","Y28","Y29","Y611","YR04","YR112","YR515","E613","R215","R38","R510","RV08","RV17","RV111","RV314","RV316","V010","V18","BV26","BV38","BV514","B08","B111","B115","B415","BG05","BG010","BG312","BG315","G310","G49","YG012","YG015","BGY05","YGY11","WG27","GG10","FY00","FY01","120","YR02","YR07","YR114","E312","E513","R015","R412","RV311","V38","BV310","BV314","B010","B114","B411","BG212","G410","YG414","WG10","WG36","GG05","Y111","Y26","Y27","Y210","Y213","Y216","Y315","Y415","E511","E615","R16","R213","R413","RV212","RV313","BG311","G312","G315","BGY08","WG28","Y211","YR33","YR34","YR39","YR316","R014","R111","R28","R210","R214","RV19","V214","BV315","B315","BG314","G213","G215","G316","FY02","FY03","Y66","YR313","E315","E415","E514","E515","R414","R514","RV18","BV31","B310","CG17","BGY15","BGY17","BGY24","WG12","WG23","WG35","GG03","GG11"]},{"k":"oa160","line":"oa","label":"Oahu 160","group":"Basic","codes":["Y08","Y28","Y29","Y611","YR04","YR112","YR515","E613","R215","R38","R510","RV08","RV17","RV111","RV314","RV316","V010","V18","BV26","BV38","BV514","B08","B111","B115","B415","BG05","BG010","BG312","BG315","G310","G49","YG012","YG015","BGY05","YGY11","WG27","GG10","FY00","FY01","120","YR02","YR07","YR114","E312","E513","R015","R412","RV311","V38","BV310","BV314","B010","B114","B411","BG212","G410","YG414","WG10","WG36","GG05","Y111","Y26","Y27","Y210","Y213","Y216","Y315","Y415","E511","E615","R16","R213","R413","RV212","RV313","BG311","G312","G315","BGY08","WG28","Y211","YR33","YR34","YR39","YR316","R014","R111","R28","R210","R214","RV19","V214","BV315","B315","BG314","G213","G215","G316","FY02","FY03","Y66","YR313","E315","E415","E514","E515","R414","R514","RV18","BV31","B310","CG17","BGY15","BGY17","BGY24","WG12","WG23","WG35","GG03","GG11","Y34","Y310","Y43","Y48","Y516","Y68","Y613","YR36","YR37","YR310","YR47","E215","E47","E411","E64","E66","E75","E710","E711","E712","R68","RV210","RV45","RV53","RV58","V07","V12","V25","BV19","CG03","CG13","CG25","CG26","CG27","BGY38","WG24","GG15","GG16","GG18","GG20"]},{"k":"oa200","line":"oa","label":"Oahu 200","group":"Basic","codes":["Y08","Y28","Y29","Y611","YR04","YR112","YR515","E613","R215","R38","R510","RV08","RV17","RV111","RV314","RV316","V010","V18","BV26","BV38","BV514","B08","B111","B115","B415","BG05","BG010","BG312","BG315","G310","G49","YG012","YG015","BGY05","YGY11","WG27","GG10","FY00","FY01","120","YR02","YR07","YR114","E312","E513","R015","R412","RV311","V38","BV310","BV314","B010","B114","B411","BG212","G410","YG414","WG10","WG36","GG05","Y111","Y26","Y27","Y210","Y213","Y216","Y315","Y415","E511","E615","R16","R213","R413","RV212","RV313","BG311","G312","G315","BGY08","WG28","Y211","YR33","YR34","YR39","YR316","R014","R111","R28","R210","R214","RV19","V214","BV315","B315","BG314","G213","G215","G316","FY02","FY03","Y66","YR313","E315","E415","E514","E515","R414","R514","RV18","BV31","B310","CG17","BGY15","BGY17","BGY24","WG12","WG23","WG35","GG03","GG11","Y34","Y310","Y43","Y48","Y516","Y68","Y613","YR36","YR37","YR310","YR47","E215","E47","E411","E64","E66","E75","E710","E711","E712","R68","RV210","RV45","RV53","RV58","V07","V12","V25","BV19","CG03","CG13","CG25","CG26","CG27","BGY38","WG24","GG15","GG16","GG18","GG20","Y411","Y57","Y610","Y615","YR09","YR25","YR29","YR38","YR44","YR57","YR510","E13","E30","E36","E49","E59","E612","E714","E81","E814","E912","R613","RV24","V13","V23","V24","V33","BG115","G112","YG013","YG212","YG510","YGY03","YGY21","YGY22","YGY24","YGY25","YGY26","YGY27","GG28"]},{"k":"oa320","line":"oa","label":"Oahu 320","group":"Basic","codes":["Y111","Y26","Y216","YR313","R014","R210","R413","RV08","RV311","V010","V18","Y213","YR07","YR112","YR39","YR515","E415","R28","R215","R412","R514","RV212","Y29","RV111","BV31","B114","BG212","Y27","Y28","Y315","Y415","Y611","YR04","YR33","YR34","E511","E515","BV315","BV514","B310","B315","B411","B415","BG05","BG314","BG315","G316","BV310","B08","B111","BG311","G310","G312","G410","BGY24","120","RV314","V13","BV38","B115","G315","G49","YG012","YG510","YGY11","WG10","G112","YG212","CG17","BGY15","WG27","GG03","GG05","GG10","R015","R16","R213","R38","RV17","RV18","RV19","RV316","V38","BV26","BV314","YG015","YG414","CG25","BGY38","GG15","GG16","Y02","Y14","YR11","YR52","RV25","BV05","BV35","B03","B28","E26","E85","R15","R27","R54","RV04","RV05","BG24","BG310","G34","G47","BGY00","YGY13","YR19","RV39","RV57","V29","BV013","BV28","BV48","BV415","E413","R23","R48","R57","RV09","RV28","RV29","B311","BG211","G44","YG111","YG112","YG610","CG28","WG06","GG12","Y03","Y34","Y416","YR47","YR57","YR58","YR511","E69","R310","R50","R59","R513","R612","RV23","RV35","RV514","RV515","V013","V015","V32","BV210","BV311","BV312","BV414","B112","B27","G24","G210","G41","YG07","YG29","YG215","YG66","WG08","GG11","FY00","FY01","FY02","FY04","Y08","E613","R510","BG010","BG312","BGY05","YR02","YR114","E312","E513","B010","WG36","Y210","E615","RV313","BGY08","WG28","Y211","YR316","R111","R214","V214","G213","G215","FY03","Y66","E315","E514","R414","BGY17","WG12","WG23","WG35","Y310","Y43","Y48","Y516","Y68","Y613","YR36","YR37","YR310","E215","E47","E411","E64","E66","E75","E710","E711","E712","R68","RV210","RV45","RV53","RV58","V07","V12","V25","BV19","CG03","CG13","CG26","CG27","WG24","GG18","GG20","Y411","Y57","Y610","Y615","YR09","YR25","YR29","YR38","YR44","YR510","E13","E30","E36","E49","E59","E612","E714","E81","E814","E912","R613","RV24","V23","V24","V33","BG115","YG013","YGY03","YGY21","YGY22","YGY24","YGY25","YGY26","YGY27","GG28","Y214","Y37","YR014","YR110","YR27","YR214","YR54","E93","E913","E915","R19","E03","E111","R58","RV27","RV211","RV31","RV32","V09","V016","V35","V411","V413","BV03","BV04","BV09","BV014","BV18","BV27","BV34","BV37","BV59","B07","BG22","G29","YG014","YG114","YG313","CG14","BGY36","YGY01","WG05"]},{"k":"oanew120","line":"oa","label":"Oahu New 120 add-on","group":"Add-ons","codes":["Y02","Y14","YR11","YR52","RV25","BV05","BV35","B03","B28","E26","E85","R15","R27","R54","RV04","RV05","BG24","BG310","G34","G47","BGY00","YGY13","YR19","RV39","RV57","V29","BV013","BV28","BV48","BV415","E413","R23","R48","R57","RV09","RV28","RV29","B311","BG211","G44","YG111","YG112","YG610","CG28","WG06","GG12","Y03","Y416","YR58","YR511","E69","R310","R50","R59","R513","R612","RV23","RV35","RV514","RV515","V013","V015","V32","BV210","BV311","BV312","BV414","B112","B27","G24","G210","G41","YG07","YG29","YG215","YG66","WG08","FY04","Y214","Y37","YR014","YR110","YR27","YR214","YR54","E93","E913","E915","R19","E03","E111","R58","RV27","RV211","RV31","RV32","V09","V016","V35","V411","V413","BV03","BV04","BV09","BV014","BV18","BV27","BV34","BV37","BV59","B07","BG22","G29","YG014","YG114","YG313","CG14","BGY36","YGY01","WG05"]},{"k":"oaskin36","line":"oa","label":"Oahu 36 Skin Tone","group":"Pastel & tones","codes":["Y210","Y216","Y34","Y43","Y48","Y415","YR02","YR04","YR07","YR09","YR25","YR29","YR33","YR34","YR37","YR38","YR39","YR313","YR47","YR57","YR515","E47","E49","E59","E511","E513","E514","E515","E66","E612","E615","E75","E711","E81","E814","R16"]},{"k":"oagray36","line":"oa","label":"Oahu 36 Gray Tone","group":"Pastel & tones","codes":["YR02","E111","B27","B310","B311","B411","B415","CG03","CG13","CG17","CG25","CG28","BGY00","BGY15","BGY17","BGY24","BGY38","YGY01","YGY11","YGY13","YGY25","YGY26","WG05","WG06","WG10","WG24","WG27","WG36","GG03","GG05","GG10","GG11","GG12","GG16","GG18","GG20"]},{"k":"oapastel48","line":"oa","label":"Oahu 48 Pastel","group":"Pastel & tones","codes":["Y02","Y14","Y57","Y66","YR04","YR11","YR34","YR52","YR54","E13","E26","E30","E47","E85","R15","R16","R23","R27","R54","RV04","RV05","RV25","RV31","RV32","V12","V32","BV05","BV34","BV37","B03","B07","B27","B28","BG24","BG310","G24","G34","G47","CG03","CG14","BGY00","YGY01","YGY03","YGY13","YGY25","WG05","WG12","GG03"]}]};
+  var FAMILIES = [
+    { k:'Y', label:'Yellows', c:'#F2C94C' }, { k:'YR', label:'Oranges', c:'#F2994A' }, { k:'R', label:'Reds', c:'#E0525A' },
+    { k:'RV', label:'Pinks', c:'#E97BB0' }, { k:'V', label:'Violets', c:'#9B7FD4' }, { k:'BV', label:'Blue-violets', c:'#7E8FE0' },
+    { k:'B', label:'Blues', c:'#4C9BE0' }, { k:'BG', label:'Teals', c:'#3BB3A6' }, { k:'G', label:'Greens', c:'#5DBB6B' },
+    { k:'YG', label:'Yellow-greens', c:'#B5CC52' }, { k:'E', label:'Earth tones', c:'#B9876A' },
+    { k:'GRAY', label:'Grays', c:'#9A9AA3' }, { k:'FY', label:'Fluorescents', c:'#F5E642' }
+  ];
+  var FAM_IX = {}; FAMILIES.forEach(function(f, i){ FAM_IX[f.k] = i; });
+  var GRAY_PFX = { BGY:1, YGY:1, GG:1, CG:1, WG:1, '':1 };
+  function famOf(code){ var p = (String(code).match(/^[A-Z]*/) || [''])[0]; return GRAY_PFX[p] || FAM_IX[p] == null ? 'GRAY' : p; }
+  function lum(hex){ // OKLab lightness, so "light to dark" looks right to the eye
+    var c = [0, 2, 4].map(function(i){ var v = parseInt(hex.substr(i, 2), 16) / 255; return v <= .04045 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); });
+    var l = .4122214708 * c[0] + .5363325363 * c[1] + .0514459929 * c[2], m = .2119034982 * c[0] + .6806995451 * c[1] + .1073969566 * c[2], s = .0883024619 * c[0] + .2817188376 * c[1] + .6299787005 * c[2];
+    return .2104542553 * Math.cbrt(l) + .793617785 * Math.cbrt(m) - .0040720468 * Math.cbrt(s);
+  }
+  var COL = {}, LINE_CODES = { h:{}, oa:{} }, SET = {};
+  DATA.colors.forEach(function(c){ COL[c[0]] = { code:c[0], name:c[1], hex:'#' + c[2], hOld:c[3], oaOld:c[4], fam:famOf(c[0]), L:lum(c[2]), num:parseInt((c[0].match(/\d+/) || ['0'])[0], 10) }; });
+  DATA.sets.forEach(function(s){ SET[s.k] = s; s.codes.forEach(function(c){ LINE_CODES[s.line][c] = 1; }); });
+  var LINES = { h:'Honolulu', oa:'Oahu' };
+
+  /* ============================================================
+     STATE
+     ============================================================ */
+  var LAYOUTS = ['compact', 'big', 'cards'];
+  function defaultState(){
+    return { version:1, src:'set', set:'h320', line:'h', layout:'compact', order:'color', prefilled:false, old:true, names:false, blend:true, heads:false, paper: (navigator.language || '').indexOf('US') >= 0 ? 'Letter' : 'Letter', title:'', own:{}, mkLine:'h' };
+  }
+  function normalize(raw){
+    raw = raw || {}; var d = defaultState(), own = {};
+    var src = raw.own && typeof raw.own === 'object' ? raw.own : {};
+    Object.keys(src).forEach(function(code){ if(!COL[code]) return; var x = src[code] || {}, e = {};
+      if(x.h && LINE_CODES.h[code]) e.h = 1; if(x.oa && LINE_CODES.oa[code]) e.oa = 1; if(e.h || e.oa) own[code] = e; });
+    return {
+      version:1, src: raw.src === 'mine' ? 'mine' : 'set', set: SET[raw.set] ? raw.set : d.set, line: raw.line === 'oa' ? 'oa' : 'h',
+      layout: LAYOUTS.indexOf(raw.layout) >= 0 ? raw.layout : d.layout, order: raw.order === 'code' ? 'code' : 'color',
+      prefilled: !!raw.prefilled, old: raw.old !== false, names: !!raw.names, blend: raw.blend !== false, heads: !!raw.heads,
+      paper: raw.paper === 'A4' ? 'A4' : 'Letter', title: String(raw.title || '').slice(0, 40), own: own, mkLine: raw.mkLine === 'oa' ? 'oa' : 'h'
+    };
+  }
+  function load(){
+    try{ var raw = localStorage.getItem(STORAGE_KEY); return raw ? normalize(JSON.parse(raw)) : defaultState(); }
+    catch(e){ return defaultState(); }
+  }
+  function save(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch(e){ toast('Could not save. Your browser storage may be full or turned off.'); }
+  }
+  function ownedCount(){ return Object.keys(state.own).length; }
+  function isEmpty(){ return !ownedCount(); }
+
+  var state = load();
+  var currentView = 'chart';
+  var pageIx = 0;
+
+  /* ============================================================
+     CHART: which colors, in what order
+     ============================================================ */
+  function chartColors(){
+    var codes = state.src === 'mine' ? Object.keys(state.own) : SET[state.set].codes.slice();
+    var list = codes.filter(function(c){ return COL[c]; }).map(function(c){ return COL[c]; });
+    list.sort(function(a, b){
+      var f = FAM_IX[a.fam] - FAM_IX[b.fam]; if(f) return f;
+      if(state.order === 'code'){ var pa = a.code.match(/^[A-Z]*/)[0], pb = b.code.match(/^[A-Z]*/)[0]; if(pa !== pb) return pa < pb ? -1 : 1; return a.num - b.num || (a.code < b.code ? -1 : 1); }
+      return b.L - a.L;
+    });
+    return list;
+  }
+  function oldOf(c){
+    if(state.src === 'set') return SET[state.set].line === 'oa' ? c.oaOld : c.hOld;
+    var o = state.own[c.code] || {}; return o.h ? c.hOld : c.oaOld;
+  }
+  function chartTitle(){ return state.title.trim() || (state.src === 'mine' ? 'My Ohuhu markers' : SET[state.set].label); }
+
+  /* ============================================================
+     PAGE LAYOUT (all sizes in millimeters, exact when printed)
+     ============================================================ */
+  var PAPER = { Letter:{ w:215.9, h:279.4 }, A4:{ w:210, h:297 } }, MARGIN = 8, HEAD = 10, FOOT = 5, GAP = 1.4;
+  function area(){ var p = PAPER[state.paper]; return { W: p.w - 2 * MARGIN, H: p.h - 2 * MARGIN }; }
+  // Cell content for a given cell width (compact + big layouts).
+  function cellSpec(w, big){
+    var code = big ? 8.2 : Math.max(5.2, Math.min(8, w * .5)), small = code * .78, pt = .3528; // pt -> mm
+    var sw = big ? 13 : Math.max(5, w * .5), bl = big && state.blend ? 8 : 0;
+    var lines = code * pt * 1.08 + (state.old ? small * pt * 1.08 : 0) + ((big || state.names) ? small * pt * 1.15 : 0);
+    return { code:code, small:small, sw:sw, bl:bl, h: 1.6 + sw + (bl ? bl + .5 : 0) + .5 + lines + .5 };
+  }
+  // Flow items (and optional family headings) into rows and pages.
+  function flow(list, cols, cellW, cellH, headH){
+    var A = area(), top = HEAD + 1, bottom = A.H - FOOT, pages = [], page = [], y = top, col = 0, lastFam = null;
+    function newPage(){ pages.push(page); page = []; y = top; col = 0; }
+    list.forEach(function(c){
+      if(state.heads && c.fam !== lastFam){
+        if(col){ y += cellH + GAP; col = 0; }
+        if(y + headH + cellH > bottom) newPage();
+        page.push({ t:'h', fam:c.fam, x:0, y:y, w:A.W, h:headH - 1 }); y += headH; lastFam = c.fam;
+      }
+      if(col === 0 && y + cellH > bottom) newPage();
+      page.push({ t:'c', c:c, x: col * (cellW + GAP), y:y, w:cellW, h:cellH });
+      col++; if(col === cols){ col = 0; y += cellH + GAP; }
+    });
+    if(page.length) pages.push(page);
+    return pages;
+  }
+  function buildPages(){
+    var list = chartColors(), A = area();
+    if(!list.length) return { pages:[], list:list };
+    if(state.layout === 'cards') return { pages: cardPages(list), list:list, cards:true };
+    var best = null;
+    var colRange = state.layout === 'big' ? [6] : [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
+    colRange.forEach(function(cols){
+      var w = (A.W - (cols - 1) * GAP) / cols, spec = cellSpec(w, state.layout === 'big');
+      var pages = flow(list, cols, w, spec.h, 7);
+      var score = pages.length * 1000 - w; // fewest pages, then the biggest boxes
+      if(!best || score < best.score) best = { score:score, pages:pages, w:w, spec:spec, cols:cols };
+    });
+    return { pages: best.pages, spec: best.spec, list:list };
+  }
+  // Cards: one card per color family (split if long), 3 x 3 cards per page, with cut lines.
+  function cardPages(list){
+    var A = area(), cw = (A.W - 2 * 3) / 3, ch = (A.H - HEAD - 1 - FOOT - 2 * 3) / 3, per = 12, cards = [];
+    FAMILIES.forEach(function(f){
+      var items = list.filter(function(c){ return c.fam === f.k; });
+      for(var i = 0; i < items.length; i += per) cards.push({ fam:f, items: items.slice(i, i + per), part: Math.floor(i / per) + 1, parts: Math.ceil(items.length / per) });
+    });
+    var pages = [];
+    for(var i = 0; i < cards.length; i += 9) pages.push(cards.slice(i, i + 9).map(function(cd, k){ return { t:'card', card:cd, x:(k % 3) * (cw + 3), y: HEAD + 1 + Math.floor(k / 3) * (ch + 3), w:cw, h:ch }; }));
+    return pages;
+  }
+  function cellHtml(e, spec){
+    var c = e.c, big = state.layout === 'big', fill = state.prefilled ? c.hex : '#fff';
+    return '<div class="cell" style="left:' + e.x.toFixed(2) + 'mm;top:' + e.y.toFixed(2) + 'mm;width:' + e.w.toFixed(2) + 'mm;height:' + e.h.toFixed(2) + 'mm">' +
+      '<div class="sw" style="height:' + spec.sw.toFixed(2) + 'mm;background:' + fill + '"></div>' + (spec.bl ? '<div class="bl" style="height:' + spec.bl + 'mm"></div>' : '') +
+      '<b style="font-size:' + spec.code.toFixed(2) + 'pt">' + escapeHtml(c.code) + '</b>' +
+      (state.old ? '<i style="font-size:' + spec.small.toFixed(2) + 'pt">' + escapeHtml(oldOf(c) || '–') + '</i>' : '') +
+      ((big || state.names) ? '<em style="font-size:' + spec.small.toFixed(2) + 'pt">' + escapeHtml(c.name) + '</em>' : '') + '</div>';
+  }
+  function cardHtml(e){
+    var cd = e.card, cols = 3, rows = 4, gx = 1.6, inner = e.w - 5, sw = (inner - (cols - 1) * gx) / cols, rh = (e.h - 5 - 6 - (rows - 1) * gx) / rows;
+    var cells = cd.items.map(function(c, i){
+      var x = (i % cols) * (sw + gx), y = 6 + Math.floor(i / cols) * (rh + gx), fill = state.prefilled ? c.hex : '#fff';
+      return '<div class="cell" style="left:' + (2.5 + x).toFixed(2) + 'mm;top:' + (2.5 + y).toFixed(2) + 'mm;width:' + sw.toFixed(2) + 'mm;height:' + rh.toFixed(2) + 'mm">' +
+        '<div class="sw" style="height:' + (rh - (state.old ? 7.4 : 4.6)).toFixed(2) + 'mm;background:' + fill + '"></div><b style="font-size:7.5pt">' + escapeHtml(c.code) + '</b>' + (state.old ? '<i style="font-size:5.8pt">' + escapeHtml(oldOf(c) || '–') + '</i>' : '') + '</div>';
+    }).join('');
+    return '<div class="card" style="left:' + e.x.toFixed(2) + 'mm;top:' + e.y.toFixed(2) + 'mm;width:' + e.w.toFixed(2) + 'mm;height:' + e.h.toFixed(2) + 'mm"><div class="ch">' + escapeHtml(cd.fam.label) + '<span>' + (cd.parts > 1 ? cd.part + ' of ' + cd.parts : cd.items.length + ' colors') + '</span></div>' + cells + '</div>';
+  }
+  function pageHtml(built, i){
+    var A = area(), page = built.pages[i], n = built.pages.length;
+    var body = page.map(function(e){
+      if(e.t === 'card') return cardHtml(e);
+      if(e.t === 'h'){ var f = FAMILIES[FAM_IX[e.fam]]; return '<div class="fh" style="left:0;top:' + e.y.toFixed(2) + 'mm;width:' + e.w.toFixed(2) + 'mm;height:' + e.h.toFixed(2) + 'mm;font-size:8pt"><i style="background:' + f.c + '"></i>' + f.label + '</div>'; }
+      return cellHtml(e, built.spec);
+    }).join('');
+    var what = (state.order === 'code' ? 'Code order' : 'Light to dark') + ' · ' + built.list.length + ' colors' + (n > 1 ? ' · page ' + (i + 1) + ' of ' + n : '');
+    return '<div class="pg" style="background:#fff;width:' + A.W + 'mm;height:' + A.H + 'mm"><div class="hd"><b>' + escapeHtml(chartTitle()) + '</b><span>' + what + '</span></div>' + body +
+      '<div class="ft"><span>' + (state.old ? 'New code in bold · old code in italics' : 'Ohuhu new codes') + (state.layout === 'big' && state.blend ? ' · dashed box: blend test' : '') + (state.layout === 'cards' ? ' · cut along the dashed lines' : '') + '</span><span>Ohuhu Swatch Chart Maker</span></div></div>';
+  }
+
+  /* ============================================================
+     RENDERING
+     ============================================================ */
+  function renderChart(){
+    var built = buildPages(), n = built.pages.length;
+    if(pageIx >= n) pageIx = Math.max(0, n - 1);
+    document.getElementById('hero-title').textContent = chartTitle();
+    document.getElementById('hero-sub').textContent = n ? n + ' page' + (n > 1 ? 's' : '') + ' · ' + (state.paper === 'A4' ? 'A4' : 'Letter') : 'No markers yet';
+    setHeroNum(document.getElementById('hero-big'), built.list.length);
+    document.getElementById('hero-unit').textContent = built.list.length === 1 ? 'swatch ready to print' : 'swatches ready to print';
+    document.getElementById('mini-pages').textContent = n;
+    document.getElementById('mini-pages-l').textContent = n === 1 ? 'page' : 'pages';
+    document.getElementById('mini-fams').textContent = famCount(built.list);
+    document.getElementById('mini-paper').textContent = state.paper === 'A4' ? 'A4' : 'Letter';
+    document.getElementById('own-chip').textContent = ownedCount();
+    // live preview of one page, scaled to fit
+    var P = PAPER[state.paper], wrap = document.getElementById('paper'), avail = Math.min(document.querySelector('#view-chart .peek').clientWidth - 40, 400), mm = 3.7795;
+    var k = avail / (P.w * mm); wrap.style.width = (P.w * mm * k) + 'px'; wrap.style.height = (P.h * mm * k) + 'px';
+    var sc = document.getElementById('page-scale'); sc.style.transform = 'scale(' + k + ')'; sc.style.padding = MARGIN + 'mm';
+    sc.innerHTML = n ? pageHtml(built, pageIx) : '<div class="pg" style="background:#fff;width:' + area().W + 'mm;height:' + area().H + 'mm;display:grid;place-items:center;font-size:14pt;color:#999">Tick your markers in My markers</div>';
+    var pager = document.getElementById('pager'); pager.style.display = n > 1 ? 'flex' : 'none';
+    document.getElementById('page-label').textContent = 'Page ' + (pageIx + 1) + ' of ' + n;
+    pager.querySelector('[data-action="page-prev"]').disabled = pageIx === 0; pager.querySelector('[data-action="page-next"]').disabled = pageIx >= n - 1;
+    // step 1: sets
+    document.querySelectorAll('#line-seg button').forEach(function(b){ b.classList.toggle('on', b.dataset.line === state.line); });
+    var groups = {}, order = [];
+    DATA.sets.filter(function(s){ return s.line === state.line; }).forEach(function(s){ if(!groups[s.group]){ groups[s.group] = []; order.push(s.group); } groups[s.group].push(s); });
+    document.getElementById('set-list').innerHTML = order.map(function(g, gi){
+      return '<div class="set-group"><span class="emo">' + (GROUP_EMO[g] || '🖍️') + '</span>' + escapeHtml(g) + '</div><div class="set-grid">' + groups[g].map(function(s){
+        var dots = setDots(s.codes);
+        var name = s.label.replace(/^(Honolulu|Oahu) /, ''), extra = name.match(/\((.+)\)/);
+        return '<button class="setbtn tap g-' + (gi % 5) + (state.src === 'set' && state.set === s.k ? ' on' : '') + '" data-action="pick-set" data-k="' + s.k + '"><span class="dots">' + dots + '</span><span class="t"><b>' + escapeHtml(name.replace(/ \(.+\)/, '')) + '</b><span>' + (extra ? escapeHtml(extra[1]) + ' · ' : '') + s.codes.length + ' colors</span></span><span class="tick">' + icon('check', 16) + '</span></button>';
+      }).join('') + '</div>';
+    }).join('');
+    var mine = document.getElementById('mine-row'); mine.classList.toggle('on', state.src === 'mine');
+    document.getElementById('mine-sub').textContent = ownedCount() ? ownedCount() + ' markers ticked in My markers' : 'Pick them in My markers first';
+    // step 2: layouts
+    var L = [['compact', 'One page', 'Small boxes, fewest pages'], ['big', 'Big boxes', 'Names + blend test'], ['cards', 'Cards', 'One card per family']];
+    document.getElementById('layout-choices').innerHTML = L.map(function(l){
+      return '<button class="choice tap' + (state.layout === l[0] ? ' on' : '') + '" data-action="layout" data-v="' + l[0] + '">' + miniPage(l[0]) + '<b>' + l[1] + '</b><span>' + l[2] + '</span></button>';
+    }).join('');
+    // step 3: details
+    document.querySelectorAll('#order-seg button').forEach(function(b){ b.classList.toggle('on', b.dataset.v === state.order); });
+    var O = [['prefilled', 'Fill in the colors', 'Prints a close screen color in each box. Leave off to color them in yourself.'],
+      ['old', 'Show old codes', 'Under each new code, for older markers'],
+      ['names', 'Color names', 'Adds the name under each code', 'compact'],
+      ['blend', 'Blend test box', 'A dashed box under each swatch', 'big'],
+      ['heads', 'Family headings', 'Yellows, Reds, Blues… each on its own row', 'notcards']];
+    document.getElementById('opts').innerHTML = O.filter(function(o){ return !o[3] || o[3] === state.layout || (o[3] === 'notcards' && state.layout !== 'cards'); }).map(function(o){
+      return '<div class="opt"><div class="t"><b>' + o[1] + '</b><span>' + o[2] + '</span></div><button class="switch-hit" data-action="opt" data-k="' + o[0] + '" role="switch" aria-checked="' + !!state[o[0]] + '" aria-label="' + o[1] + '"><span class="switch' + (state[o[0]] ? ' on' : '') + '"></span></button></div>';
+    }).join('');
+    var ti = document.getElementById('chart-title'); if(document.activeElement !== ti) ti.value = state.title; ti.placeholder = state.src === 'mine' ? 'My Ohuhu markers' : SET[state.set].label;
+    document.querySelectorAll('#paper-seg button').forEach(function(b){ b.classList.toggle('on', b.dataset.v === state.paper); });
+    hydrateIcons();    // the entrance animation scales cards while it plays: center the button labels again once it settles
+    clearTimeout(optT); optT = setTimeout(opticalCenter, 1000);
+  }
+  var optT = 0;
+  var GROUP_EMO = { 'Basic':'🖍️', 'Add-ons':'➕', 'Pastel & tones':'🌸' };
+  function famCount(list){ var f = {}; list.forEach(function(c){ var x = c && (c.fam || (COL[c] && COL[c].fam) || (c.code && COL[c.code] && COL[c.code].fam)); if(x) f[x] = 1; }); return Object.keys(f).length; }
+  // Hero number: counts up the first time, then rolls in place when it changes.
+  function setHeroNum(el, v){
+    if(!el) return;
+    var prev = el.getAttribute('data-v');
+    el.setAttribute('data-v', v);
+    if(prev === null || reduceMotion){ el.textContent = v; if(prev === null && !reduceMotion){ el.setAttribute('data-count', v); el.removeAttribute('data-counted'); countUp(el.parentNode); } return; }
+    if(String(v) !== prev) rollNumber(el, v, '');
+  }
+  function setDots(codes){ // 9 sample colors spread through the set
+    var l = codes.map(function(c){ return COL[c]; }).sort(function(a, b){ return FAM_IX[a.fam] - FAM_IX[b.fam] || b.L - a.L; }), out = '';
+    for(var i = 0; i < 9; i++){ var c = l[Math.floor((i + .5) * l.length / 9)]; out += '<i style="background:' + c.hex + '"></i>'; }
+    return out;
+  }
+  function miniPage(kind){
+    var cs = ['#F2C94C', '#F2994A', '#E0525A', '#E97BB0', '#9B7FD4', '#4C9BE0', '#3BB3A6', '#5DBB6B', '#B9876A', '#9A9AA3'], h = '';
+    if(kind === 'compact'){ for(var i = 0; i < 48; i++) h += '<i style="height:5px;background:' + cs[Math.floor(i / 5) % 10] + ';opacity:.85"></i>'; return '<span class="mini-page" style="grid-template-columns:repeat(6,1fr)">' + h + '</span>'; }
+    if(kind === 'big'){ for(var r = 0; r < 3; r++){ for(var j = 0; j < 3; j++) h += '<i style="height:9px;background:' + cs[r * 3 + j] + '"></i>'; for(var q = 0; q < 3; q++) h += '<i style="height:5px;border:1px dashed #bbb;box-sizing:border-box"></i>'; } return '<span class="mini-page" style="grid-template-columns:repeat(3,1fr);column-gap:3px;row-gap:2px">' + h + '</span>'; }
+    for(var k = 0; k < 6; k++){ var inner = ''; for(var m = 0; m < 6; m++) inner += '<i style="height:4px;background:' + cs[k] + '"></i>'; h += '<i style="border:1px dashed #bbb;border-radius:2px;padding:1px;display:grid;grid-template-columns:repeat(3,1fr);gap:1px">' + inner + '</i>'; }
+    return '<span class="mini-page" style="grid-template-columns:repeat(2,1fr);gap:3px">' + h + '</span>';
+  }
+
+  var mkFam = 'all', mkQuery = '';
+  function renderMarkers(){
+    document.getElementById('mk-count').textContent = ownedCount() + ' ticked';
+    markerStats();
+    document.querySelectorAll('#mk-line-seg button').forEach(function(b){ b.classList.toggle('on', b.dataset.line === state.mkLine); });
+    var line = state.mkLine, codes = Object.keys(LINE_CODES[line]).map(function(c){ return COL[c]; });
+    var fams = FAMILIES.filter(function(f){ return codes.some(function(c){ return c.fam === f.k; }); });
+    document.getElementById('fam-row').innerHTML = '<button class="fam' + (mkFam === 'all' ? ' on' : '') + '" data-action="mk-fam" data-f="all">All</button>' + fams.map(function(f){
+      return '<button class="fam' + (mkFam === f.k ? ' on' : '') + '" data-action="mk-fam" data-f="' + f.k + '"><i style="background:' + f.c + '"></i>' + f.label + '</button>'; }).join('');
+    var q = mkQuery.trim().toLowerCase();
+    var list = codes.filter(function(c){ return (mkFam === 'all' || c.fam === mkFam) && (!q || c.code.toLowerCase().indexOf(q) >= 0 || c.name.toLowerCase().indexOf(q) >= 0 || String(line === 'h' ? c.hOld : c.oaOld).toLowerCase() === q); })
+      .sort(function(a, b){ return FAM_IX[a.fam] - FAM_IX[b.fam] || b.L - a.L; });
+    document.getElementById('mk-grid').innerHTML = list.length ? list.map(function(c){
+      var on = state.own[c.code] && state.own[c.code][line];
+      return '<button class="mk tap' + (on ? ' on' : '') + '" data-action="mk-toggle" data-code="' + c.code + '" aria-pressed="' + !!on + '" aria-label="' + escapeHtml(c.code + ' ' + c.name) + '"><span class="dot" style="background:' + c.hex + '"></span><b>' + escapeHtml(c.code) + '</b><span class="tick">' + icon('check', 14) + '</span></button>';
+    }).join('') : '<div class="empty-mk" style="grid-column:1/-1"><span class="emo">🔍</span>No marker matches “' + escapeHtml(mkQuery) + '”.</div>';
+  }
+  function markerStats(){
+    var h = 0, oa = 0, f = {};
+    Object.keys(state.own).forEach(function(c){ var e = state.own[c]; if(e.h) h++; if(e.oa) oa++; if(COL[c]) f[COL[c].fam] = 1; });
+    setHeroNum(document.getElementById('mk-big'), ownedCount());
+    document.getElementById('mk-mini-h').textContent = h;
+    document.getElementById('mk-mini-oa').textContent = oa;
+    document.getElementById('mk-mini-fam').textContent = Object.keys(f).length;
+  }
+  function renderSettings(){}
+
+  function renderTips(){}
+  var RENDER = { chart:renderChart, markers:renderMarkers, tips:renderTips, settings:renderSettings };
+  function renderCurrent(){ RENDER[currentView](); }
+
+  /* ============================================================
+     PRINT
+     ============================================================ */
+  function printChart(){
+    var built = buildPages();
+    if(!built.pages.length){ toast('Tick your markers first.'); switchView('markers'); return; }
+    var P = PAPER[state.paper];
+    document.getElementById('print').innerHTML = built.pages.map(function(p, i){ return pageHtml(built, i); }).join('');
+    document.getElementById('page-size').textContent = '@page{ size: ' + (state.paper === 'A4' ? 'A4' : 'letter') + ' portrait; margin: ' + MARGIN + 'mm; }';
+    document.getElementById('party-num').textContent = built.list.length + ' swatches';
+    openModal({ party:true, title:'Your chart is ready!', message: built.pages.length + ' page' + (built.pages.length > 1 ? 's' : '') + ' on ' + (state.paper === 'A4' ? 'A4' : 'US Letter') + '. In the print screen, choose your printer (or Save as PDF) and keep Scale at 100%. Thicker paper keeps alcohol ink from bleeding through.', confirmLabel:'Print', onConfirm:function(){ setTimeout(function(){ window.print(); }, 60); } });
+    setTimeout(function(){ celebrate(null); }, 250);
+  }
+
+  /* ============================================================
+     MY MARKERS: add a set, import from the Ultimate tracker
+     ============================================================ */
+  function addSetSheet(){
+    var line = state.mkLine, sets = DATA.sets.filter(function(s){ return s.line === line; });
+    var ov = document.getElementById('set-sheet');
+    ov.querySelector('.sheet').innerHTML = '<h3>Add a ' + LINES[line] + ' set</h3><p>Ticks every marker in the set. Untick the ones you don\'t have.</p><div class="set-grid" style="margin:12px 0 16px">' +
+      sets.map(function(s){ return '<button class="setbtn tap" data-action="add-set" data-k="' + s.k + '"><span class="dots">' + setDots(s.codes) + '</span><span class="t"><b>' + escapeHtml(s.label.replace(/^(Honolulu|Oahu) /, '').replace(/ \(.+\)/, '')) + '</b><span>' + s.codes.length + ' colors</span></span></button>'; }).join('') +
+      '</div><div class="modal-actions"><button class="btn btn-secondary" data-action="close-sheet">Close</button></div>';
+    ov.classList.remove('hidden'); hydrateIcons();
+  }
+  function importUltimate(file){
+    var rd = new FileReader();
+    rd.onload = function(){
+      try{
+        var d = JSON.parse(rd.result), m = d && d.m; if(!m || typeof m !== 'object') throw 0;
+        var n = 0;
+        Object.keys(m).forEach(function(code){ var x = m[code] || {}; if(!COL[code]) return;
+          ['h', 'oa'].forEach(function(l){ if(x[l] && LINE_CODES[l][code]){ var e = state.own[code] = state.own[code] || {}; if(!e[l]){ e[l] = 1; n++; } } }); });
+        save(); renderCurrent(); toast(n ? 'Added ' + n + ' markers from your tracker.' : 'Those markers are already ticked.');
+      }catch(e){ toast("That file isn't an Ultimate Ohuhu backup."); }
+    };
+    rd.readAsText(file);
+  }
+
+  // Realistic sample: someone with the Honolulu 120 plus the 36 skin tones.
+  function applySampleData(){
+    var own = {};
+    SET.h120.codes.concat(SET.hskin36.codes).forEach(function(c){ own[c] = { h:1 }; });
+    state = normalize({ src:'set', set:'h320', line:'h', layout:'compact', own: own });
+  }
+
+  /* ============================================================
+     FEEDBACK: toasts (with Undo), confirm modal, confetti
+     ============================================================ */
+  function toast(message, opts){
+    opts = opts || {};
+    var c = document.getElementById('toast-container');
+    var el = document.createElement('div');
+    el.className = 'toast'; el.setAttribute('role','status');
+    var span = document.createElement('span'); span.textContent = message; el.appendChild(span);
+    if(opts.actionLabel && opts.onAction){
+      var b = document.createElement('button'); b.className = 'toast-action'; b.textContent = opts.actionLabel;
+      b.addEventListener('click', function(){ opts.onAction(); el.remove(); });
+      el.appendChild(b);
+    }
+    c.appendChild(el);
+    while(c.children.length > 3) c.removeChild(c.firstChild);
+    setTimeout(function(){
+      el.style.transition = 'opacity .2s'; el.style.opacity = '0';
+      setTimeout(function(){ el.remove(); }, 200);
+    }, opts.duration || (opts.actionLabel ? 5000 : 3000));
+  }
+
+  var modalHandler = null;
+  function openModal(cfg){
+    document.getElementById('modal-title').textContent = cfg.title;
+    document.getElementById('party-top').classList.toggle('hidden', !cfg.party);
+    document.getElementById('modal-title').style.textAlign = cfg.party ? 'center' : '';
+    document.getElementById('modal-message').style.textAlign = cfg.party ? 'center' : '';
+    document.getElementById('modal-message').textContent = cfg.message || '';
+    var btn = document.getElementById('modal-confirm');
+    btn.textContent = cfg.confirmLabel || 'Confirm';
+    btn.className = 'btn ' + (cfg.danger ? 'btn-danger-solid' : 'btn-primary');
+    var input = document.getElementById('modal-confirm-input');
+    if(cfg.requireText){
+      input.classList.remove('hidden'); input.value = ''; input.placeholder = 'Type ' + cfg.requireText + ' to confirm';
+      btn.disabled = true;
+      input.oninput = function(){ btn.disabled = input.value.trim().toUpperCase() !== cfg.requireText; };
+    } else { input.classList.add('hidden'); input.oninput = null; btn.disabled = false; }
+    modalHandler = cfg.onConfirm || null;
+    document.getElementById('modal-overlay').classList.remove('hidden');
+  }
+  function closeModal(){ document.getElementById('modal-overlay').classList.add('hidden'); modalHandler = null; }
+
+
+  /* Count numbers up when a view renders: <b data-count="23" data-suffix="%">23</b>,
+     money: <b data-count="1240" data-prefix="$">$1,240</b>.
+     Call countUp(viewEl) at the end of a render. Runs once per element; the final
+     value is already in the markup, so screenshots and reduced-motion show it. */
+  function countUp(root){
+    if(reduceMotion) return;
+    (root || document).querySelectorAll('[data-count]:not([data-counted])').forEach(function(el){
+      el.setAttribute('data-counted', '1');
+      var to = parseFloat(el.getAttribute('data-count')); if(isNaN(to)) return;
+      var pre = el.getAttribute('data-prefix') || '', suf = el.getAttribute('data-suffix') || '', dec = (String(to).split('.')[1] || '').length, t0 = performance.now(), dur = 900;
+      // data-prefix="$" for money; numbers keep thousands separators (1,240)
+      (function step(t){ var p = Math.min(1, (t - t0) / dur), e = p === 1 ? 1 : 1 - Math.pow(2, -10 * p);
+        el.textContent = pre + (to * e).toLocaleString(undefined, { minimumFractionDigits: dec, maximumFractionDigits: dec }) + suf; if(p < 1) requestAnimationFrame(step); })(t0);
+    });
+  }
+
+  /* ============================================================
+     MOTION KIT helpers
+     ============================================================ */
+  // Glides the bottom-nav pill under the active tab (sub-views mark their parent tab active).
+  function moveNavPill(){
+    var nav = document.getElementById('bottom-nav'), pill = nav && nav.querySelector('.nav-pill'), b = nav && nav.querySelector('button.active');
+    if(!pill || !b || !b.offsetWidth) return;
+    pill.style.width = b.offsetWidth + 'px'; pill.style.transform = 'translateX(' + b.offsetLeft + 'px)';
+    if(!nav.classList.contains('glide')) requestAnimationFrame(function(){ nav.classList.add('glide'); });
+  }
+  window.addEventListener('resize', moveNavPill);
+  // A tiny vibration (Android only; iPhones ignore it).
+  function buzz(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms || 8); }catch(e){} }
+  // Ripple + sparks from an element (runs automatically when a checkbox gets ticked).
+  function motionBurst(el, colors){
+    if(reduceMotion || !el) return;
+    el.classList.add('motion-host');
+    var cs = getComputedStyle(document.documentElement);
+    colors = colors || [cs.getPropertyValue('--sage').trim() || '#7B9075', cs.getPropertyValue('--terracotta').trim() || '#CC8B79', cs.getPropertyValue('--sage-strong').trim() || '#5F7259'];
+    var r = document.createElement('span'); r.className = 'm-ripple'; el.appendChild(r);
+    setTimeout(function(){ r.remove(); }, 650);
+    for(var k = 0; k < 8; k++){
+      var s = document.createElement('span'), a = k / 8 * Math.PI * 2, d = 22 + Math.random() * 8;
+      s.className = 'm-spark'; s.style.background = colors[k % colors.length];
+      s.style.setProperty('--x', (Math.cos(a) * d).toFixed(1) + 'px'); s.style.setProperty('--y', (Math.sin(a) * d).toFixed(1) + 'px');
+      el.appendChild(s); (function(n){ setTimeout(function(){ n.remove(); }, 650); })(s);
+    }
+  }
+  // Ticking a checkbox: burst + buzz before the re-render replaces the element.
+  document.addEventListener('pointerdown', function(e){
+    var hit = e.target.closest('.check-hit'); if(!hit) return;
+    var box = hit.querySelector('.checkbox');
+    if(box && !box.classList.contains('checked')){
+      var ghost = document.createElement('span'), r = hit.getBoundingClientRect();
+      ghost.style.cssText = 'position:fixed;left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height + 'px;pointer-events:none;z-index:650';
+      document.body.appendChild(ghost); motionBurst(ghost); buzz(10);
+      setTimeout(function(){ ghost.remove(); }, 700);
+    } else buzz(6);
+  }, true);
+  // Odometer-style number for a value that changes in place: rollNumber(el, 1240, '$').
+  function rollNumber(el, value, prefix){
+    var str = Math.round(value).toLocaleString('en-US'), chars = str.split('');
+    if(reduceMotion){ el.textContent = (prefix || '') + str; return; }
+    if(el.getAttribute('data-roll') !== str.replace(/\d/g, '0')){
+      el.setAttribute('data-roll', str.replace(/\d/g, '0')); el.classList.add('roll');
+      el.innerHTML = (prefix ? '<span>' + escapeHtml(prefix) + '</span>' : '') + chars.map(function(c){
+        return /\d/.test(c) ? '<span class="roll-col">' + '0123456789'.split('').map(function(d){ return '<span>' + d + '</span>'; }).join('') + '</span>' : '<span>' + c + '</span>';
+      }).join('');
+      el.offsetHeight;
+    }
+    var cols = el.querySelectorAll('.roll-col'), i = 0;
+    requestAnimationFrame(function(){ chars.forEach(function(c){ if(/\d/.test(c)){ cols[i].style.transform = 'translateY(-' + (Number(c) * 1.1) + 'em)'; i++; } }); });
+  }
+  // Drag a bottom sheet down to close it (fires the overlay's own close-on-backdrop click).
+  (function(){
+    var sheet = null, y0 = 0, dy = 0;
+    document.addEventListener('pointerdown', function(e){
+      var sh = e.target.closest('.overlay:not(.hidden) > .sheet');
+      if(!sh || window.innerWidth >= 900 || sh.scrollTop > 0 || e.target.closest('input, textarea, select, button, a')) return;
+      sheet = sh; y0 = e.clientY; dy = 0;
+    });
+    document.addEventListener('pointermove', function(e){
+      if(!sheet) return; dy = Math.max(0, e.clientY - y0);
+      if(dy > 4){ sheet.style.animation = 'none'; sheet.style.transition = 'none'; sheet.style.transform = 'translateY(' + dy + 'px)'; }
+    });
+    document.addEventListener('pointerup', function(){
+      if(!sheet) return; var sh = sheet; sheet = null;
+      sh.style.transition = 'transform .35s var(--spring)';
+      if(dy > 90){ var ov = sh.parentElement; sh.style.transform = 'translateY(100%)'; setTimeout(function(){ ov.dispatchEvent(new MouseEvent('click', { bubbles:true })); sh.style.transform = ''; sh.style.transition = ''; sh.style.animation = ''; }, 220); }
+      else { sh.style.transform = ''; setTimeout(function(){ sh.style.transition = ''; sh.style.animation = ''; }, 360); }
+    });
+  })();
+
+  /* ============================================================
+     THEME: Light / Dark / Auto (stored on its own, so "Clear all data"
+     and backups never change it). The head script applied it already.
+     ============================================================ */
+  var THEME_KEY = STORAGE_KEY + ':theme';
+  var darkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  function themePref(){ try{ return localStorage.getItem(THEME_KEY) || 'auto'; }catch(e){ return 'auto'; } }
+  function applyTheme(animate){
+    var t = themePref(), root = document.documentElement;
+    var dark = t === 'dark' || (t === 'auto' && darkQuery && darkQuery.matches);
+    if(animate && !reduceMotion){ root.classList.add('theme-anim'); setTimeout(function(){ root.classList.remove('theme-anim'); }, 350); }
+    root.setAttribute('data-theme', dark ? 'dark' : 'light'); root.setAttribute('data-theme-pref', t);
+    var meta = document.getElementById('theme-color'); if(meta) meta.setAttribute('content', getComputedStyle(document.body).backgroundColor);
+    document.querySelectorAll('[data-theme-set]').forEach(function(b){ var on = b.dataset.themeSet === t; b.classList.toggle('active', on); b.setAttribute('aria-checked', on ? 'true' : 'false'); });
+  }
+  function setTheme(t){ try{ localStorage.setItem(THEME_KEY, t); }catch(e){} applyTheme(true); }
+  if(darkQuery){ (darkQuery.addEventListener ? darkQuery.addEventListener('change', function(){ applyTheme(true); }) : darkQuery.addListener(function(){ applyTheme(true); })); }
+
+  // Party: emoji + paper confetti from a point (or the top of the screen).
+  function celebrate(el){
+    if(reduceMotion) return;
+    var r = el ? el.getBoundingClientRect() : { left: innerWidth/2, top: innerHeight*0.35, width:0, height:0 };
+    var x = r.left + r.width/2, y = r.top + r.height/2;
+    var bits = ['🎉','✨','🖍️','💜','⭐','🎨'], cols = ['#FF9A5C','#EE4F86','#7A4FE0','#3D8BE6','#2BC46F','#FFC46B'];
+    for(var i = 0; i < 26; i++){
+      var p = document.createElement('span'); p.className = 'p-confetti';
+      if(i % 3 === 0){ p.textContent = bits[i % bits.length]; p.classList.add('emo'); }
+      else { p.style.width = (6 + Math.random()*5) + 'px'; p.style.height = (9 + Math.random()*6) + 'px'; p.style.borderRadius = '2px'; p.style.background = cols[i % cols.length]; }
+      var a = Math.random() * Math.PI * 2, d = 90 + Math.random() * 140;
+      p.style.setProperty('--x0', x + 'px'); p.style.setProperty('--y0', y + 'px');
+      p.style.setProperty('--x1', (x + Math.cos(a) * d) + 'px'); p.style.setProperty('--y1', (y + Math.sin(a) * d * 0.7 + 160) + 'px');
+      p.style.setProperty('--r', (Math.random() * 720 - 360) + 'deg'); p.style.setProperty('--t', (1.1 + Math.random() * 0.8) + 's');
+      document.body.appendChild(p);
+      (function(n){ setTimeout(function(){ n.remove(); }, 2100); })(p);
+    }
+    buzz(14);
+  }
+  // Little emoji sparks around a tapped tile (marker check-off).
+  function sparkle(el){
+    if(reduceMotion || !el) return;
+    var bits = ['✨','💜','⭐'];
+    for(var i = 0; i < 5; i++){
+      var s2 = document.createElement('span'), a = i / 5 * Math.PI * 2 - Math.PI/2;
+      s2.className = 'p-spark emo'; s2.textContent = bits[i % 3];
+      s2.style.setProperty('--dx', Math.cos(a) * 34 + 'px'); s2.style.setProperty('--dy', Math.sin(a) * 34 + 'px');
+      el.appendChild(s2); (function(n){ setTimeout(function(){ n.remove(); }, 800); })(s2);
+    }
+  }
+
+  /* ============================================================
+     NAVIGATION
+     ============================================================ */
+  function buildNav(){
+    document.getElementById('nav-list').innerHTML = NAV.map(function(n){
+      return '<li><button class="nav-btn" data-view="' + n.view + '">' + icon(n.icon) + escapeHtml(n.label) + '</button></li>';
+    }).join('');
+    document.getElementById('bottom-nav').innerHTML = NAV.map(function(n, i){
+      return (i === 2 ? '<button class="add" data-action="print" aria-label="Print my chart">' + icon('print') + '</button>' : '') +
+        '<button data-view="' + n.view + '">' + icon(n.icon) + '<span>' + escapeHtml(n.label) + '</span></button>';
+    }).join('');
+  }
+  function switchView(name){
+    if(!RENDER[name]) name = 'chart';
+    currentView = name;
+    Object.keys(RENDER).forEach(function(v){ document.getElementById('view-' + v).classList.toggle('active', v === name); });
+    document.querySelectorAll('.nav-btn, .bottom-nav button').forEach(function(b){ b.classList.toggle('active', b.dataset.view === name); });
+    moveNavPill();
+    renderCurrent();
+    window.scrollTo({ top: 0 });
+  }
+
+  /* ============================================================
+     DATA: export / import / clear / sample
+     ============================================================ */
+  function exportData(){
+    var blob = new Blob([JSON.stringify(state, null, 2)], { type:'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = BACKUP_PREFIX + '-backup-' + todayStr() + '.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    toast('Backup downloaded.');
+  }
+  function importData(file){
+    var reader = new FileReader();
+    reader.onload = function(e){
+      try{
+        var parsed = JSON.parse(e.target.result);
+        if(!parsed || typeof parsed !== 'object' || !parsed.own || typeof parsed.own !== 'object') throw new Error('bad');
+        state = normalize(parsed); save(); renderCurrent();
+        toast('Backup restored.');
+      }catch(err){ toast("That file isn't a Swatch Chart Maker backup. For an Ultimate backup, use My markers."); }
+    };
+    reader.readAsText(file);
+  }
+  function clearAll(){
+    openModal({
+      title:'Clear all data?',
+      message:"This removes everything from this browser. It can't be undone, so export a backup first if you might want it back.",
+      confirmLabel:'Clear everything', danger:true, requireText:'DELETE',
+      onConfirm:function(){ state = defaultState(); save(); switchView('chart'); toast('All cleared. A fresh start.'); }
+    });
+  }
+  function loadSample(){
+    openModal({
+      title:'Tick sample markers?', message:'This ticks a Honolulu 120 set plus the 36 skin tones so you can try every layout.',
+      confirmLabel:'Load samples',
+      onConfirm:function(){ applySampleData(); save(); switchView('chart'); toast('Sample markers ticked.'); }
+    });
+  }
+
+  /* ============================================================
+     EVENTS
+     ============================================================ */
+  function init(){
+    buildNav();
+    hydrateIcons();
+    applyTheme(false);
+    document.addEventListener('click', function(e){
+      var nav = e.target.closest('.nav-btn, .bottom-nav button[data-view]');
+      if(nav){ switchView(nav.dataset.view); return; }
+      var th = e.target.closest('[data-theme-set]');
+      if(th){ setTheme(th.dataset.themeSet); return; }
+      var go = e.target.closest('[data-goto]');
+      if(go){ switchView(go.dataset.goto); return; }
+
+      // One delegated handler for every data-action button.
+      var b = e.target.closest('[data-action]'); if(!b) return;
+      var a = b.dataset.action;
+      if(a === 'print') printChart();
+      else if(a === 'page-prev'){ pageIx = Math.max(0, pageIx - 1); renderChart(); }
+      else if(a === 'page-next'){ pageIx++; renderChart(); }
+      else if(a === 'line-tab'){ state.line = b.dataset.line; save(); renderChart(); }
+      else if(a === 'pick-set'){ state.src = 'set'; state.set = b.dataset.k; pageIx = 0; save(); renderChart(); buzz(6); }
+      else if(a === 'use-mine'){ if(!ownedCount()){ switchView('markers'); toast('Tick the markers you own, then tap Make my chart.'); return; } state.src = 'mine'; pageIx = 0; save(); renderChart(); }
+      else if(a === 'layout'){ state.layout = b.dataset.v; if(b.dataset.v === 'big') state.names = true; pageIx = 0; save(); renderChart(); }
+      else if(a === 'order'){ state.order = b.dataset.v; save(); renderChart(); }
+      else if(a === 'opt'){ state[b.dataset.k] = !state[b.dataset.k]; save(); renderChart(); }
+      else if(a === 'paper'){ state.paper = b.dataset.v; pageIx = 0; save(); renderChart(); }
+      else if(a === 'mk-line'){ state.mkLine = b.dataset.line; mkFam = 'all'; save(); renderMarkers(); }
+      else if(a === 'mk-fam'){ mkFam = b.dataset.f; renderMarkers(); }
+      else if(a === 'mk-toggle'){
+        var code = b.dataset.code, l = state.mkLine, e = state.own[code] || {};
+        if(e[l]) delete e[l]; else e[l] = 1;
+        if(e.h || e.oa) state.own[code] = e; else delete state.own[code];
+        save(); var on = !!(e[l]); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); buzz(on ? 8 : 4);
+        if(on){ motionBurst(b); sparkle(b); }
+        document.getElementById('mk-count').textContent = ownedCount() + ' ticked';
+        markerStats();
+      }
+      else if(a === 'add-set-sheet') addSetSheet();
+      else if(a === 'add-set'){
+        var s = SET[b.dataset.k], before = JSON.stringify(state.own), n = 0;
+        s.codes.forEach(function(c){ var e2 = state.own[c] = state.own[c] || {}; if(!e2[s.line]){ e2[s.line] = 1; n++; } });
+        save(); document.getElementById('set-sheet').classList.add('hidden'); state.mkLine = s.line; renderMarkers();
+        toast(n ? 'Ticked ' + n + ' markers from the ' + s.label + '.' : 'All of those were already ticked.', n ? { actionLabel:'Undo', onAction:function(){ state.own = JSON.parse(before); save(); renderCurrent(); } } : {});
+      }
+      else if(a === 'close-sheet') document.getElementById('set-sheet').classList.add('hidden');
+      else if(a === 'import-ultimate') document.getElementById('ultimate-file').click();
+      else if(a === 'chart-mine'){ if(!ownedCount()){ toast('Tick at least one marker first.'); return; } state.src = 'mine'; pageIx = 0; save(); switchView('chart'); }
+    });
+
+    document.getElementById('set-sheet').addEventListener('click', function(e){ if(e.target.id === 'set-sheet') e.target.classList.add('hidden'); });
+    document.getElementById('ultimate-file').addEventListener('change', function(e){ var f = e.target.files && e.target.files[0]; if(f) importUltimate(f); e.target.value = ''; });
+    document.getElementById('mk-search').addEventListener('input', function(){ mkQuery = this.value; renderMarkers(); });
+    document.getElementById('chart-title').addEventListener('input', function(){ state.title = this.value.slice(0, 40); save(); renderChart(); });
+    window.addEventListener('resize', function(){ if(currentView === 'chart') renderChart(); });
+
+    document.getElementById('load-sample-btn').addEventListener('click', loadSample);
+    document.getElementById('export-btn').addEventListener('click', exportData);
+    document.getElementById('import-btn').addEventListener('click', function(){ document.getElementById('import-file').click(); });
+    document.getElementById('import-file').addEventListener('change', function(e){ var f = e.target.files && e.target.files[0]; if(f) importData(f); e.target.value = ''; });
+    document.getElementById('clear-btn').addEventListener('click', clearAll);
+
+    document.getElementById('modal-confirm').addEventListener('click', function(){ var h = modalHandler; closeModal(); if(h) h(); });
+    document.getElementById('modal-cancel').addEventListener('click', closeModal);
+    document.getElementById('modal-overlay').addEventListener('click', function(e){ if(e.target.id === 'modal-overlay') closeModal(); });
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeModal(); });
+
+    // Screenshot / demo hook: "?view=settings&sample=1" opens a view
+    // directly, pre-filled with sample data (only when the planner is
+    // empty). Buyers opening the file normally never have a query
+    // string, so this never affects real use. The mobile checker and
+    // listing screenshots both rely on it.
+    var params = new URLSearchParams(window.location.search);
+    if(params.get('sample') === '1' && isEmpty()){ applySampleData(); save(); }
+    switchView(RENDER[params.get('view')] ? params.get('view') : 'chart');
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+})();
+</script>
+</body>
+</html>
