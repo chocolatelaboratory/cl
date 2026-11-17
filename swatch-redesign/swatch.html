@@ -704,7 +704,7 @@ h1, h2, h3{ letter-spacing:-.02em; }
 }
 body{ background: var(--bg); color: var(--ink-body); }
 .main{ padding-top: calc(18px + env(safe-area-inset-top)); }
-@media (min-width:900px){ .main{ max-width:520px; } }
+@media (min-width:900px){ .main{ max-width:540px; margin:0 auto; flex:1; } .bottom-nav{ display:none !important; } }
 
 /* bouncy pop-in entrance */
 .rise{ animation: p-rise .75s var(--bounce) both; animation-delay: calc(var(--i,0) * 80ms + 60ms); }
