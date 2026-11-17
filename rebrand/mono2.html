@@ -1,0 +1,21 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter:wght@300&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#f2f2f5}#grid{display:grid;grid-template-columns:repeat(3,500px);gap:0 24px;padding:24px}
+.lab{font-family:Inter;font-size:14px;color:#888;letter-spacing:.1em;padding:6px 0 18px}svg{display:block;background:#fff}
+text{font-family:'Cormorant Garamond',serif;fill:#1d2147}</style></head><body><div id="grid"></div>
+<script>
+const RB=`<defs><linearGradient id="rb" x1="0" x2="1"><stop offset="0" stop-color="#ff9ad4"/><stop offset=".2" stop-color="#ffc89a"/><stop offset=".35" stop-color="#f6f0a0"/><stop offset=".5" stop-color="#9ff0d0"/><stop offset=".68" stop-color="#9adcff"/><stop offset=".85" stop-color="#b6a2ff"/><stop offset="1" stop-color="#b6a2ff" stop-opacity="0"/></linearGradient><filter id="bl"><feGaussianBlur stdDeviation="5"/></filter><filter id="b1"><feGaussianBlur stdDeviation=".6"/></filter></defs>`;
+const line=(x,y,w)=>`<rect x="${x}" y="${y-5}" width="${w}" height="10" fill="url(#rb)" opacity=".3" filter="url(#bl)"/><rect x="${x}" y="${y-.6}" width="${w}" height="1.2" fill="url(#rb)" opacity=".9" filter="url(#b1)"/>`;
+// woven: V over L, white gap around V where it crosses
+const woven=(sz,lx,vx,y,extra='')=>`<text x="${lx}" y="${y}" font-size="${sz}" font-weight="300">L</text>
+ <text x="${vx}" y="${y}" font-size="${sz}" font-style="italic" font-weight="300" stroke="#fff" stroke-width="${sz*.05}" paint-order="stroke">V</text>${extra}`;
+const D=[
+['1 · Woven LV (V threads over the L)', woven(260,95,175,345)],
+['2 · L tucked inside the V', `<text x="110" y="370" font-size="380" font-style="italic" font-weight="300">V</text><text x="222" y="250" font-size="120" font-weight="400" stroke="#fff" stroke-width="10" paint-order="stroke">L</text>`],
+['3 · Woven LV + glow line', woven(240,110,180,320)+line(130,372,240)],
+['4 · Woven LV in a hairline circle', `<circle cx="250" cy="250" r="190" fill="none" stroke="#1d2147" stroke-opacity=".55" stroke-width="1.5"/>`+woven(200,135,195,318)],
+['5 · Shared stroke: L foot becomes V', `<text x="95" y="345" font-size="260" font-weight="300">L</text><text x="196" y="345" font-size="260" font-style="italic" font-weight="300" stroke="#fff" stroke-width="4" paint-order="stroke">V</text><rect x="150" y="333" width="210" height="1.6" fill="#1d2147" opacity=".7"/>`],
+['6 · L inside V + glow line', `<text x="125" y="350" font-size="340" font-style="italic" font-weight="300">V</text><text x="226" y="240" font-size="105" font-weight="400" stroke="#fff" stroke-width="9" paint-order="stroke">L</text>`+line(140,400,230)],
+];
+const g=document.getElementById('grid');D.forEach(([t,h],k)=>g.insertAdjacentHTML('beforeend',`<div><svg id="n${k}" width="500" height="500" viewBox="0 0 500 500">${RB}${h}</svg><div class="lab">${t}</div></div>`));
+</script></body></html>
