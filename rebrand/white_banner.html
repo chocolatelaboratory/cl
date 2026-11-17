@@ -5,13 +5,15 @@ canvas{position:absolute;inset:0;width:100%;height:100%}.t{position:absolute;z-i
 .n{font-family:'Cormorant Garamond',serif;font-weight:300;letter-spacing:.05em;line-height:1}
 .cap{letter-spacing:.45em;text-transform:uppercase;font-weight:300;color:#5d6398}</style></head><body>
 <script>
-function mk(id,W,H,ox,oy,or,html){const el=document.createElement('div');el.className='c';el.id=id;el.style.cssText=`width:${W}px;height:${H}px`;const cv=document.createElement('canvas');el.appendChild(cv);document.body.appendChild(el);
- const s=2,w=W*s,h=H*s,X=w*ox,Y=h*oy,r=h*or;cv.width=w;cv.height=h;const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);
- x.save();x.translate(X,Y+r*1.18);x.scale(1,.2);x.filter=`blur(${r*.06}px)`;
+function mk(id,W,H,html){const el=document.createElement('div');el.className='c';el.id=id;el.style.cssText=`width:${W}px;height:${H}px`;const cv=document.createElement('canvas');el.appendChild(cv);document.body.appendChild(el);
+ el.insertAdjacentHTML('beforeend',html);const s=2,w=W*s,h=H*s;cv.width=w;cv.height=h;const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);
+ const tg=el.querySelector('.cap');if(!tg)return;const eb=el.getBoundingClientRect(),tb=tg.getBoundingClientRect();
+ const cx=(tb.left-eb.left+tb.width/2-(parseFloat(getComputedStyle(tg).letterSpacing)||0)/2)*s,cy=(tb.bottom-eb.top)*s+tb.height*s*1.6,rx=tb.width*s*.6,ry=tb.height*s*1.1;
+ x.save();x.translate(cx,cy);x.scale(1,ry/rx);x.filter=`blur(${ry*.6}px)`;
  const cg=x.createConicGradient(0,0,0);['#ff7ac8','#ffb36b','#fff07a','#7affc1','#6fd3ff','#9b7bff','#ff7ac8'].forEach((c,i,a)=>cg.addColorStop(i/(a.length-1),c));
- x.globalAlpha=.75;x.fillStyle=cg;x.beginPath();x.arc(0,0,r*.85,0,7);x.arc(0,0,r*.35,0,7,true);x.fill();x.restore();
- el.insertAdjacentHTML('beforeend',html)}
+ x.globalAlpha=.8;x.fillStyle=cg;x.beginPath();x.arc(0,0,rx,0,7);x.fill();x.restore()}
 const L=s=>`<div class="n" style="font-size:${s}px">Lucian <i>Vox</i></div>`,TAG='Lighting your digital pathway';
-mk('white_banner_mini',600,150,.8,.44,.3,`<div class="t" style="left:46px;top:46px">${L(36)}<div class="cap" style="font-size:7px;margin-top:12px">${TAG}</div></div>`);
-mk('white_banner_large',1680,420,.74,.44,.31,`<div class="t" style="left:120px;top:140px">${L(82)}<div class="cap" style="font-size:13px;margin-top:40px">${TAG}</div></div>`);
+mk('white_banner_mini',600,150,`<div class="t" style="left:46px;top:36px">${L(36)}<div class="cap" style="font-size:7px;margin-top:12px">${TAG}</div></div>`);
+mk('white_banner_large',1680,420,`<div class="t" style="left:120px;top:110px">${L(82)}<div class="cap" style="font-size:13px;margin-top:40px">${TAG}</div></div>`);
+mk('white_icon',500,500,`<div class="t n" style="inset:0;display:flex;align-items:center;justify-content:center;font-size:330px;padding-right:20px"><i>V</i></div>`);
 </script></body></html>
