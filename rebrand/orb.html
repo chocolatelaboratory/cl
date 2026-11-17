@@ -1,0 +1,50 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Inter:wght@300&display=swap" rel="stylesheet">
+<style>body{margin:0;background:#000}.c{position:relative;overflow:hidden;color:#eef1ff;font-family:Inter,sans-serif}
+canvas{position:absolute;inset:0;width:100%;height:100%}.t{position:absolute;z-index:2}
+.n{font-family:'Cormorant Garamond',serif;font-weight:300;letter-spacing:.05em;line-height:1}
+.cap{letter-spacing:.45em;text-transform:uppercase;font-weight:300;color:#b9c2e8}
+.rule{height:1px;background:linear-gradient(90deg,rgba(185,194,232,.6),transparent)}</style></head><body>
+<script>
+const R=(a,b)=>a+Math.random()*(b-a);
+function grain(x,w,h){const d=x.getImageData(0,0,w,h);for(let i=0;i<d.data.length;i+=4){const n=(Math.random()-.5)*14;d.data[i]+=n;d.data[i+1]+=n;d.data[i+2]+=n}x.putImageData(d,0,0)}
+function bg(x,w,h,X,Y,r){x.fillStyle='#04050c';x.fillRect(0,0,w,h);
+ let g=x.createRadialGradient(X,Y,0,X,Y,r*3.2);g.addColorStop(0,'rgba(70,80,170,.35)');g.addColorStop(.5,'rgba(40,30,90,.12)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,w,h);
+ x.save();x.globalCompositeOperation='lighter';x.translate(X,0);x.rotate(.12);g=x.createLinearGradient(-r*.5,0,r*.5,0);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(.5,'rgba(170,190,255,.07)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(-r*.5,-h,r,Y+h);x.restore();
+ for(let i=0;i<220;i++){const a=R(0,6.28),d=r*R(1.2,3.5);x.fillStyle=`rgba(200,215,255,${R(.05,.5)})`;x.beginPath();x.arc(X+Math.cos(a)*d,Y+Math.sin(a)*d,R(.4,1.6),0,7);x.fill()}}
+function orb(x,X,Y,r){
+ // reflection pool / shadow glow below
+ let g=x.createRadialGradient(X,Y+r*1.15,0,X,Y+r*1.15,r*1.1);g.addColorStop(0,'rgba(150,130,255,.28)');g.addColorStop(1,'rgba(0,0,0,0)');x.save();x.scale(1,.25);x.fillStyle=g;x.beginPath();x.arc(X,(Y+r*1.15)/.25,r*1.1,0,7);x.restore();
+ x.save();x.translate(X,Y+r*1.15);x.scale(1,.18);g=x.createRadialGradient(0,0,0,0,0,r);g.addColorStop(0,'rgba(170,150,255,.35)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(-r,-r,2*r,2*r);x.restore();
+ x.save();x.beginPath();x.arc(X,Y,r,0,7);x.clip();
+ g=x.createRadialGradient(X,Y+r*.2,r*.2,X,Y,r);g.addColorStop(0,'rgba(20,24,60,.55)');g.addColorStop(.75,'rgba(60,70,150,.25)');g.addColorStop(1,'rgba(190,205,255,.55)');x.fillStyle=g;x.fillRect(X-r,Y-r,2*r,2*r);
+ x.globalCompositeOperation='screen';
+ const bands=[['255,120,210',0,.0],['110,225,255',.9,.09],['175,140,255',1.8,-.08],['255,240,250',2.6,.02]];
+ bands.forEach(([c,o,dy])=>{for(let p=0;p<3;p++){x.beginPath();for(let t=0;t<=1.001;t+=.01){const px=X-r*1.1+t*2.2*r,py=Y+r*dy+Math.sin(t*5.5+o)*r*.17+Math.sin(t*11+o)*r*.03;t?x.lineTo(px,py):x.moveTo(px,py)}
+  x.lineWidth=r*[.26,.12,.03][p];x.strokeStyle=`rgba(${c},${[.25,.45,.8][p]})`;x.filter=`blur(${r*[.09,.035,.006][p]}px)`;x.stroke()}});
+ x.filter='none';
+ // inner rim / fresnel
+ g=x.createRadialGradient(X,Y,r*.82,X,Y,r);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(210,220,255,.55)');x.fillStyle=g;x.fillRect(X-r,Y-r,2*r,2*r);
+ // bottom caustic
+ g=x.createRadialGradient(X+r*.15,Y+r*.78,0,X+r*.15,Y+r*.78,r*.45);g.addColorStop(0,'rgba(255,200,240,.5)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(X-r,Y-r,2*r,2*r);
+ // window highlight
+ x.globalCompositeOperation='source-over';x.save();x.translate(X-r*.38,Y-r*.48);x.rotate(-.6);g=x.createRadialGradient(0,0,0,0,0,r*.3);g.addColorStop(0,'rgba(255,255,255,.95)');g.addColorStop(.4,'rgba(255,255,255,.35)');g.addColorStop(1,'rgba(255,255,255,0)');x.scale(1.5,.7);x.fillStyle=g;x.fillRect(-r,-r,2*r,2*r);x.restore();
+ x.restore();
+ // crisp rim
+ x.lineWidth=Math.max(1.5,r*.006);g=x.createLinearGradient(X-r,Y-r,X+r,Y+r);g.addColorStop(0,'rgba(255,255,255,.85)');g.addColorStop(.5,'rgba(160,170,255,.15)');g.addColorStop(1,'rgba(255,180,235,.6)');x.strokeStyle=g;x.beginPath();x.arc(X,Y,r,0,7);x.stroke();
+ // small secondary specular
+ x.fillStyle='rgba(255,255,255,.7)';x.beginPath();x.arc(X+r*.55,Y+r*.55,r*.025,0,7);x.fill();}
+function mk(id,W,H,ox,oy,or,html,plain){const el=document.createElement('div');el.className='c';el.id=id;el.style.cssText=`width:${W}px;height:${H}px`;const cv=document.createElement('canvas');el.appendChild(cv);document.body.appendChild(el);
+ const s=2,w=W*s,h=H*s;cv.width=w;cv.height=h;const x=cv.getContext('2d');const X=w*ox,Y=h*oy,r=h*or;bg(x,w,h,X,Y,r);orb(x,X,Y,r);grain(x,w,h);if(html)el.insertAdjacentHTML('beforeend',html)}
+const L=(s)=>`<div class="n" style="font-size:${s}px">Lucian <i>Vox</i></div>`;
+// Etsy big banner 3360x840 (rendered 1680x420 @2x)
+mk('banner_large',1680,420,.74,.47,.33,`<div class="t" style="left:120px;top:128px">${L(82)}<div class="rule" style="width:300px;margin:22px 0 18px"></div><div class="cap" style="font-size:13px">Designs &nbsp;·&nbsp; the voice of light</div></div><div class="t cap" style="right:120px;bottom:38px;font-size:11px;opacity:.6">Digital planners & playbooks</div>`);
+// Etsy mini banner 1200x300 (600x150 @2x)
+mk('banner_mini',600,150,.8,.47,.32,`<div class="t" style="left:46px;top:44px">${L(36)}<div class="cap" style="font-size:7px;margin-top:12px">Designs · the voice of light</div></div>`);
+// Shop icon 1000x1000 (500 @2x), orb only
+mk('icon',500,500,.5,.46,.3,'');
+// Icon with monogram
+mk('icon_mono',500,500,.5,.5,.32,`<div class="t n" style="inset:0;display:flex;align-items:center;justify-content:center;font-size:128px;color:rgba(255,255,255,.92);text-shadow:0 0 24px rgba(160,170,255,.8)"><i>V</i></div>`);
+// Social header 1500x500 (750x250 @2x)
+mk('social_header',750,250,.5,.42,.26,`<div class="t" style="width:100%;bottom:22px;text-align:center"><div class="n" style="font-size:30px">Lucian <i>Vox</i></div></div>`);
+</script></body></html>
